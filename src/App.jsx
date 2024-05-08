@@ -23,6 +23,7 @@ const App = () => {
   <BrowserRouter>
   <Routes>
   <Route path="/" element={<Home/>}/>
+  <Route path="/home" element={<Home/>}/>
   <Route path="/public" element={<Protected/>}/>
   </Routes>
   </BrowserRouter>
