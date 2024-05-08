@@ -1,8 +1,8 @@
 import React from "react";
 import Keycloak from 'keycloak-js';
-import Nav from "./components/Nav";
 import Protected from './components/Protected';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Navbar from "./components/navbar";
 const keycloak = new Keycloak({
     realm: 'performance',
     url: 'http://localhost:8080',
@@ -21,7 +21,7 @@ const App = () => {
  return  <div>
   <BrowserRouter>
   <Routes>
-  <Route path="/" element={<Nav/>}/>
+  <Route path="/" element={<Navbar/>}/>
   <Route path="/public" element={<Protected/>}/>
   </Routes>
   </BrowserRouter>
