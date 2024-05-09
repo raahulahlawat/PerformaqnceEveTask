@@ -1,6 +1,7 @@
 import React from "react";
 import Keycloak from 'keycloak-js';
 import Protected from './components/Protected';
+import ProjectDetailsPage from './components/ProjectDetailsPage';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 // import Navbar from "./components/Navbar";
 import Home from "./components/Home";
@@ -24,6 +25,7 @@ const App = () => {
   <Routes>
   <Route path="/" element={<Home/>}/>
   <Route path="/home" element={<Home/>}/>
+  <Route path="/projects/:id" element={<ProjectDetailsPage />} />
   <Route path="/public" element={<Protected/>}/>
   </Routes>
   </BrowserRouter>
