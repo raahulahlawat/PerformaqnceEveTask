@@ -19,12 +19,8 @@ const Home = () => {
   const navigate= useNavigate();
   const [projects, setProjects] = useState([]);
 
-  useEffect(() => {
-    fetchProjects();
-  },[])
 
   const fetchProjects = async () => {
-
     try {
    await axios.get('http://localhost:3001/api/data')
    .then((res)=>{
@@ -42,7 +38,9 @@ const projectdetail=  (id)=>{
 navigate(`projects/${id}`)
 }
 
-
+useEffect(() => {
+  fetchProjects();
+},[fetchProjects])
 
   return (
     <div>

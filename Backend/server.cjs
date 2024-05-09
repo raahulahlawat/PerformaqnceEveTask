@@ -5,7 +5,7 @@ const cors = require('cors');
 
 const pool = new Pool({
   user: 'postgres',
-  host: '172.23.0.4',
+  host: '172.23.0.2',
   database: 'redmine',
   password: 'password',
   port: 5432, // Default PostgreSQL port
@@ -14,7 +14,7 @@ const pool = new Pool({
 const port = process.env.PORT || 3001; // Use the specified port or default to 3001
 
 app.use(cors({
-  origin: 'http://localhost:5174'
+  origin: 'http://localhost:5173'
 }));
 
 app.get('/api/data', async (req, res) => {
