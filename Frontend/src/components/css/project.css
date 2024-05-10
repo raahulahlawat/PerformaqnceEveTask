@@ -1,4 +1,4 @@
-.project-name{
+.project-name {
     font-size: 30px;
     font-weight: bolder;
     margin-left: 25px;
@@ -6,19 +6,32 @@
     list-style: none;
 }
 
-.members{
+.members {
     font-size: 20px;
     margin-left: 50px;
     margin-top: 20px;
     list-style: none;
 }
 
-.member{
+.member {
     font-size: 30px;
     font-weight: bolder;
     margin-left: 25px;
 }
 
-.heading-project{
+.heading-project {
     display: flex;
+}
+
+.assign{
+    background-color: teal;
+    border-radius: 5px;
+    padding: 10px;
+    color: white;  
+    margin-left: 75px;
+    margin-top: 20px;
+}
+
+.assign:hover{
+    background-color: black;
 }

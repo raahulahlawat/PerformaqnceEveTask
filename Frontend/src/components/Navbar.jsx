@@ -16,6 +16,7 @@ import {
   Center,
 } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import Home from './Home';
 
 const NavLink = ({ children }) => (
   <Link
@@ -73,6 +74,7 @@ export default function Nav() {
                   <br />
                   <MenuDivider />
                   <MenuItem>Your Servers</MenuItem>
+                  <MenuItem >Home</MenuItem>
                   <MenuItem>Account Settings</MenuItem>
                   <MenuItem>Logout</MenuItem>
                 </MenuList>

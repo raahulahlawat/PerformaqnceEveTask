@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import './css/home.css'
+import './css/home.css';
+import { RotatingLines } from 'react-loader-spinner';
 
 
 import {
@@ -16,55 +17,66 @@ import axios from 'axios';
 const Home = () => {
 
 
-  const navigate= useNavigate();
+  const navigate = useNavigate();
+  const [isLoading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
 
+  const projectdetail = (id) => {
+    navigate(`projects/${id}`)
+  }
 
-  const fetchProjects = async () => {
-    try {
-   await axios.get('http://localhost:3001/api/data')
-   .then((res)=>{
-    setProjects(res.data)
-   })
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    }
-  };
+  useEffect(() => {
+    axios.get('http://localhost:3001/api/data')
+      .then((res) => {
+        setProjects(res.data)
+        setLoading(false);
+      })
 
+  }, [])
 
-
-
-const projectdetail=  (id)=>{
-navigate(`projects/${id}`)
-}
-
-useEffect(() => {
-  fetchProjects();
-},[])
-
-  return (
-    <div>
-      <Navbar />
+  if (isLoading) {
+    return (
       <div>
-        <div className='project-drop'>
-          <h1 className='welcome'>Welcome to the Performance Evaluation Tracker Website</h1>
-          <br />
-          <Menu>
-            <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-              Projects
-            </MenuButton>
-            <MenuList>
-              {projects.map(project => (
-                <MenuItem key={project.id}>
-                  <Button onClick={()=>projectdetail(project.id)}>{project.name}</Button>
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+        <RotatingLines
+          visible={true}
+          height="96"
+          width="96"
+          color="grey"
+          strokeWidth="5"
+          animationDuration="0.75"
+          ariaLabel="rotating-lines-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      </div>
+    )
+  }
+  else {
+    return (
+      <div>
+        <Navbar />
+        <div>
+          <div className='project-drop'>
+            <h1 className='welcome'>Welcome to the Performance Evaluation Tracker Website</h1>
+            <br />
+            <Menu>
+              <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+                Projects
+              </MenuButton>
+              <MenuList>
+                {projects.map(project => (
+                  <MenuItem key={project.id}>
+                    <Button onClick={() => projectdetail(project.id)}>{project.name}</Button>
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
 };
 
 export default Home;
