@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Import Link from React Router
+import { Link, useNavigate } from 'react-router-dom'; 
 import Navbar from './Navbar';
 import './css/home.css'
 
@@ -40,7 +40,7 @@ navigate(`projects/${id}`)
 
 useEffect(() => {
   fetchProjects();
-},[fetchProjects])
+},[])
 
   return (
     <div>
