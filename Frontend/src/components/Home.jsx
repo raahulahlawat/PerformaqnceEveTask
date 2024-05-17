@@ -3,8 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './css/home.css';
 import { RotatingLines } from 'react-loader-spinner';
-
-
 import {
   Button, ButtonGroup, Menu,
   MenuButton,
@@ -15,8 +13,6 @@ import { ChevronDownIcon } from '@chakra-ui/icons'
 import axios from 'axios';
 
 const Home = () => {
-
-
   const navigate = useNavigate();
   const [isLoading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
@@ -31,27 +27,7 @@ const Home = () => {
         setProjects(res.data)
         setLoading(false);
       })
-
   }, [])
-
-  if (isLoading) {
-    return (
-      <div>
-        <RotatingLines
-          visible={true}
-          height="96"
-          width="96"
-          color="grey"
-          strokeWidth="5"
-          animationDuration="0.75"
-          ariaLabel="rotating-lines-loading"
-          wrapperStyle={{}}
-          wrapperClass=""
-        />
-      </div>
-    )
-  }
-  else {
     return (
       <div>
         <Navbar />
@@ -63,7 +39,7 @@ const Home = () => {
               <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
                 Projects
               </MenuButton>
-              <MenuList>
+              <MenuList style={{ maxHeight: '600px', overflowY: 'auto' }}>
                 {projects.map(project => (
                   <MenuItem key={project.id}>
                     <Button onClick={() => projectdetail(project.id)}>{project.name}</Button>
@@ -76,7 +52,5 @@ const Home = () => {
       </div>
     );
   }
-
-};
 
 export default Home;

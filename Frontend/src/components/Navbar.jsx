@@ -16,8 +16,13 @@ import {
   Center,
 } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
-import Home from './Home';
-
+import { useNavigate } from 'react-router-dom';
+import { keycloak } from '../App';
+import './css/nav.css'
+const navigate = useNavigate
+const handleNavigation = () => {
+  navigate('/');
+};
 const NavLink = ({ children }) => (
   <Link
     px={2}
@@ -31,6 +36,7 @@ const NavLink = ({ children }) => (
     {children}
   </Link>
 );
+
 
 export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -73,10 +79,16 @@ export default function Nav() {
                   </Center>
                   <br />
                   <MenuDivider />
-                  <MenuItem>Your Servers</MenuItem>
-                  <MenuItem >Home</MenuItem>
-                  <MenuItem>Account Settings</MenuItem>
-                  <MenuItem>Logout</MenuItem>
+                  <button>
+                  <MenuItem className='home' as={Link} href='/'>
+                    Home
+                  </MenuItem>
+                  </button>
+                  <MenuItem>
+                 <Button onClick={()=>keycloak.logout()}>
+                  Logout
+                 </Button>
+                  </MenuItem>
                 </MenuList>
               </Menu>
             </Stack>
@@ -85,4 +97,4 @@ export default function Nav() {
       </Box>
     </>
   );
-}
+};
