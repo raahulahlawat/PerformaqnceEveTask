@@ -3,23 +3,14 @@ import axios from 'axios';
 import Navbar from './Navbar';
 
 const TLPage = () => {
-  const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
 
   useEffect(() => {
-    fetchProjects();
+    const projectId = window.location.pathname.split('/').pop();
+    fetchProjectDetails(projectId);
   }, []);
 
-  const fetchProjects = async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/api/tl/projects');
-      setProjects(response.data);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    }
-  };
-
-  const handleProjectClick = async (projectId) => {
+  const fetchProjectDetails = async (projectId) => {
     try {
       const response = await axios.get(`http://localhost:3001/api/tl/project/${projectId}`);
       setSelectedProject(response.data);
@@ -29,12 +20,10 @@ const TLPage = () => {
   };
 
   const handleRemarksChange = (memberId, e) => {
-    // Update remarks for the member with memberId
   };
 
   const handleRemarksSubmit = async () => {
     try {
-      // Logic to submit remarks
     } catch (error) {
       console.error('Error submitting remarks:', error);
     }
@@ -43,17 +32,9 @@ const TLPage = () => {
   return (
     <div>
       <Navbar />
-      <h2>Projects</h2>
-      <ul>
-        {projects.map((project) => (
-          <li key={project.id} onClick={() => handleProjectClick(project.id)}>
-            {project.name}
-          </li>
-        ))}
-      </ul>
       {selectedProject && (
         <div>
-          <h3>{selectedProject.name}</h3>
+          <h2>{selectedProject.name}</h2>
           <ul>
             {selectedProject.members.map((member) => (
               <li key={member.id}>

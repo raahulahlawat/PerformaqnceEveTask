@@ -6,6 +6,7 @@ import AssignTicketPage from './components/AssignTicketPage';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import TLpage from "./components/TLpage";
+
 export const keycloak = new Keycloak({
     realm: 'performance',
     url: 'http://localhost:8080',
@@ -20,21 +21,22 @@ keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
     }
 });
 
-
 const App = () => {
-    return <div>
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/projects/:id" element={<ProjectDetailsPage />} />
-                <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
-                <Route path="/assign-ticket" element={<AssignTicketPage />} />
-                <Route path="/tl" element={<TLpage />} />
-                <Route path="/public" element={<Protected />} />
-            </Routes>
-        </BrowserRouter>
-
-
-    </div>
+    return (
+        <div>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/projects/:id" element={<ProjectDetailsPage isTLView={false} />} />
+                    <Route path="/project/:projectId" element={<ProjectDetailsPage isTLView={false} />} />
+                    <Route path="/tl/:projectId" element={<ProjectDetailsPage isTLView={true} />} />
+                    <Route path="/assign-ticket" element={<AssignTicketPage />} />
+                    <Route path="/tl" element={<TLpage />} />
+                    <Route path="/public" element={<Protected />} />
+                </Routes>
+            </BrowserRouter>
+        </div>
+    );
 }
+
 export default App;
