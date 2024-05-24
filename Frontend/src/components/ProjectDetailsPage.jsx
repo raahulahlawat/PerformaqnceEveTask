@@ -12,8 +12,9 @@ const ProjectDetailsPage = () => {
   const [members, setMembers] = useState([]);
   const [tlList, setTlList] = useState([]);
   const [selectedTl, setSelectedTl] = useState('');
+  const [tlMembers, setTlMembers] = useState([]);
+  const [selectedMember, setSelectedMember] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
-  const [tlMembersEmails, setTlMembersEmails] = useState([]);
   const navigate = useNavigate();
 
   const fetchProjectDetails = async () => {
@@ -22,11 +23,11 @@ const ProjectDetailsPage = () => {
       console.log("Project Details Response:", response.data);
       console.log("Fetching project details for ID:", fidi);
       setPartProject(response.data);
-  
+
       const membersResponse = await axios.get(`http://localhost:3001/project/${fidi}/members`);
       console.log("Members Response:", membersResponse.data);
       setMembers(membersResponse.data.projectMembers);
-  
+
       const tlsResponse = await axios.get(`http://localhost:3001/project/${fidi}/tls`);
       console.log("TLs Response:", tlsResponse.data);
       if (tlsResponse.data) {
@@ -38,7 +39,6 @@ const ProjectDetailsPage = () => {
       console.error('Error fetching project details:', error);
     }
   };
-  
 
   useEffect(() => {
     fetchProjectDetails();
@@ -57,43 +57,41 @@ const ProjectDetailsPage = () => {
 
   const handleTlChange = async (e) => {
     setSelectedTl(e.target.value);
-  
+    setSelectedMember(''); // Reset selected member when TL changes
+
     try {
       const response = await axios.get(`http://localhost:3001/project/${fidi}/tls/${e.target.value}/members`);
       console.log("TL Members Response:", response.data);
       if (response.data && response.data.tlMembers) {
         console.log("TL members found:", response.data.tlMembers);
-        setTlMembersEmails(response.data.tlMembers.map(member => member.login));
+        setTlMembers(response.data.tlMembers);
       } else {
         console.error("TL members data is undefined");
-        setTlMembersEmails([]);
+        setTlMembers([]);
       }
     } catch (error) {
       console.error('Error fetching TL members:', error);
     }
   };
-  
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (tlMembersEmails.length === 0) {
-        alert('No team members found for the selected Team Lead.');
+      if (!selectedMember) {
+        alert('Please select a team member.');
         return;
       }
 
       const projectName = partproject.name || 'the project';
 
-      // Loop through each TL member and send them an email
-      tlMembersEmails.forEach(async (memberEmail) => {
-        await axios.post('http://localhost:3001/send-email', {
-          recipientEmail: memberEmail,
-          subject: 'Provide Remarks for Project Members',
-          text: `Dear Team Member,\n\nYou have been assigned to review the project '${projectName}'.\n\nPlease provide your remarks for the project.\n\nThank you.\n\nLink to project: http://localhost:5173/tl/${fidi}`
-        });
+      // Send email to the selected member
+      await axios.post('http://localhost:3001/send-email', {
+        recipientEmail: selectedMember,
+        subject: 'Provide Remarks for Project Members',
+        text: `Dear Team Member,\n\nYou have been assigned to review the project '${projectName}'.\n\nPlease provide your remarks for the project.\n\nThank you.\n\nLink to project: http://localhost:5173/tl/${fidi}`
       });
 
-      console.log('Emails Sent');
+      console.log('Email Sent');
 
       navigate('/assign-ticket');
     } catch (error) {
@@ -117,12 +115,26 @@ const ProjectDetailsPage = () => {
           ))}
         </ul>
         <form onSubmit={handleSubmit}>
-          <select className='tl-dropdown' value={selectedTl} onChange={handleTlChange} required>
-            <option value="">Select Team Lead</option>
-            {tlList.map(tl => (
-              <option key={tl.group_id} value={tl.tl_id}>{tl.tl_name}</option>
-            ))}
-          </select>
+          <div>
+            <label>Select Team Lead:</label>
+            <select className='tl-dropdown' value={selectedTl} onChange={handleTlChange} required>
+              <option value="">Select Team Lead</option>
+              {tlList.map(tl => (
+                <option key={tl.group_id} value={tl.tl_id}>{tl.tl_name}</option>
+              ))}
+            </select>
+          </div>
+          {selectedTl && (
+            <div>
+              <label>Select Team Member:</label>
+              <select className='tl-member-dropdown' value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} required>
+                <option value="">Select Member</option>
+                {tlMembers.map(member => (
+                  <option key={member.user_id} value={member.login}>{member.firstname} {member.lastname}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <button className='assign' type="submit">Submit</button>
         </form>
       </div>
@@ -132,4 +144,3 @@ const ProjectDetailsPage = () => {
 };
 
 export default ProjectDetailsPage;
-

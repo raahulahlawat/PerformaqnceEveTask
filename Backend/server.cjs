@@ -25,8 +25,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: "raahuulchaudhary@gmail.com",
-    pass: "falvizqrydjjhyix",
+    // user: "raahuulchaudhary@gmail.com",
+    // pass: "falvizqrydjjhyix",
   },
 });
 async function sendEmail(recipientEmail, subject, text) {
@@ -138,12 +138,12 @@ app.get('/project/:id', async (req, res) => {
   try {
     client = await pool.connect();
     const id = req.params.id;
-    
+
     if (!id || isNaN(id)) {
       res.status(400).send('Invalid project ID');
       return;
     }
-    
+
     const result = await client.query('SELECT * FROM projects WHERE id = $1', [parseInt(id, 10)]);
     const data = result.rows[0];
     res.send(data);
@@ -162,12 +162,12 @@ app.get('/project/:id/members', async (req, res) => {
   try {
     client = await pool.connect();
     const projectId = req.params.id;
-    
+
     if (!projectId || isNaN(projectId)) {
       res.status(400).send('Invalid project ID');
       return;
     }
-    
+
     const membersQuery = `
       SELECT 
         m.*, 
@@ -216,12 +216,12 @@ app.get('/project/:id/tls', async (req, res) => {
   try {
     client = await pool.connect();
     const projectId = req.params.id;
-    
+
     if (!projectId || isNaN(projectId)) {
       res.status(400).send('Invalid project ID');
       return;
     }
-    
+
     const query = `
       WITH group_projects AS (
         SELECT
@@ -266,7 +266,7 @@ app.get('/project/:id/tls', async (req, res) => {
       ORDER BY
           gp.projectname;
     `;
-    
+
     const result = await client.query(query, [parseInt(projectId, 10)]);
     const data = result.rows;
     res.send(data);
@@ -290,7 +290,7 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
       res.status(400).send('Invalid project or TL ID');
       return;
     }
-    
+
     const query = `
       SELECT 
         u.id AS user_id,
@@ -306,7 +306,7 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
       WHERE 
         gu.group_id = $1
     `;
-    
+
     const { rows: tlMembers } = await client.query(query, [parseInt(tlId, 10)]);
     res.json({ tlMembers });
   } catch (error) {
@@ -319,13 +319,11 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
   }
 });
 
-
-
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
 
 app.listen(port, () => {
-  console.log(`Server is walking on port ${port} because it is very much tired to run` );
+  console.log(`Server is walking on port ${port} because it is very much tired to run`);
 });
