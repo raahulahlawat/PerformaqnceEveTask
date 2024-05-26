@@ -3,6 +3,7 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
 const app = express();
+const { v4: uuidv4 } = require('uuid');
 
 app.use(cors({
   origin: 'http://localhost:5173'
@@ -25,10 +26,13 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    // user: "raahuulchaudhary@gmail.com",
-    // pass: "falvizqrydjjhyix",
+    user: "raahuulchaudhary@gmail.com",
+    pass: "falvizqrydjjhyix",
   },
 });
+
+const emailLinks = {};
+
 async function sendEmail(recipientEmail, subject, text) {
   let mailOptions = {
     from: 'raahuulchaudhary@gmail.com',
@@ -37,13 +41,20 @@ async function sendEmail(recipientEmail, subject, text) {
     text: text
   };
 
-  // Send email
+
   let info = await transporter.sendMail(mailOptions);
   console.log('Email sent:', info.response);
 }
+
 app.post('/send-email', async (req, res) => {
   try {
     const { recipientEmail, subject, text } = req.body;
+
+    const urlParams = new URLSearchParams(text.split('http://localhost:5173/tl/')[1]);
+    const uniqueId = urlParams.get('id');
+    const expires = urlParams.get('expires');
+    emailLinks[uniqueId] = expires;
+
     await sendEmail(recipientEmail, subject, text);
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
@@ -52,6 +63,16 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
+app.get('/tl/:id', (req, res) => {
+  const { id: uniqueId } = req.query;
+  const expirationTime = emailLinks[uniqueId];
+
+  if (!expirationTime || new Date(expirationTime) < new Date()) {
+    return res.status(410).send('This link has expired.');
+  }
+
+  res.send('Project details and remark form');
+});
 
 // Fetch TL details along with their projects and members
 app.get('/api/tl-details', async (req, res) => {
@@ -131,7 +152,6 @@ app.get('/api/data', async (req, res) => {
     }
   }
 });
-
 
 app.get('/project/:id', async (req, res) => {
   let client;
@@ -279,6 +299,7 @@ app.get('/project/:id/tls', async (req, res) => {
     }
   }
 });
+
 app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
   let client;
   try {

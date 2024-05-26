@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import axios from 'axios';
 import './css/project.css';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 const ProjectDetailsPage = () => {
   const url = new URL(window.location.href);
@@ -57,7 +58,7 @@ const ProjectDetailsPage = () => {
 
   const handleTlChange = async (e) => {
     setSelectedTl(e.target.value);
-    setSelectedMember(''); // Reset selected member when TL changes
+    setSelectedMember('');
 
     try {
       const response = await axios.get(`http://localhost:3001/project/${fidi}/tls/${e.target.value}/members`);
@@ -83,12 +84,15 @@ const ProjectDetailsPage = () => {
       }
 
       const projectName = partproject.name || 'the project';
+      const uniqueId = uuidv4(); // Generate a unique identifier
+      // const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // Set expiration time to 24 hours from now
+      const expirationTime = new Date(Date.now() + 30 * 1000).toISOString(); 
 
       // Send email to the selected member
       await axios.post('http://localhost:3001/send-email', {
         recipientEmail: selectedMember,
         subject: 'Provide Remarks for Project Members',
-        text: `Dear Team Member,\n\nYou have been assigned to review the project '${projectName}'.\n\nPlease provide your remarks for the project.\n\nThank you.\n\nLink to project: http://localhost:5173/tl/${fidi}`
+        text: `Dear Team Member,\n\nYou have been assigned to review the project '${projectName}'.\n\nPlease provide your remarks for the project.\n\nThank you.\n\nLink to project: http://localhost:5173/tl/${fidi}?id=${uniqueId}&expires=${expirationTime}`
       });
 
       console.log('Email Sent');
@@ -116,7 +120,7 @@ const ProjectDetailsPage = () => {
         </ul>
         <form onSubmit={handleSubmit}>
           <div>
-            <label>Select Team Lead:</label>
+            <label className='tl'>Select Team Lead:</label>
             <select className='tl-dropdown' value={selectedTl} onChange={handleTlChange} required>
               <option value="">Select Team Lead</option>
               {tlList.map(tl => (
@@ -126,7 +130,7 @@ const ProjectDetailsPage = () => {
           </div>
           {selectedTl && (
             <div>
-              <label>Select Team Member:</label>
+              <label className='tl'>Select Team Member:</label>
               <select className='tl-member-dropdown' value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} required>
                 <option value="">Select Member</option>
                 {tlMembers.map(member => (

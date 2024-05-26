@@ -28,7 +28,7 @@
     border-radius: 5px;
     padding: 5px;
     color: white;  
-    margin-left: 75px;
+    margin-left: 110px;
     margin-top: 20px;
     width: 80px;
 }
@@ -51,4 +51,8 @@
     margin-left: 10px;
     margin-top: 10px;
     border-radius: 2px;
+}
+
+.tl{
+    margin-left: 15px;
 }
