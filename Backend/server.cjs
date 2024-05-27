@@ -2,11 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
+const session = require('express-session');
+const Keycloak = require('keycloak-connect');
 const app = express();
-const { v4: uuidv4 } = require('uuid');
+// const { v4: uuidv4 } = require('uuid');
 
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: 'http://localhost:5173',
+  credentials: true 
 }));
 
 const pool = new Pool({
@@ -16,6 +19,18 @@ const pool = new Pool({
   password: 'password',
   port: 5432,
 });
+
+const memoryStore = new session.MemoryStore();
+app.use(session({
+  secret: 'vvvJdhrIUQgP19qALcc0hzQUcZZIJhNH',
+  resave: false,
+  saveUninitialized: true,
+  store: memoryStore
+}));
+
+const keycloakConfig = require('./keycloak.json');
+const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
+app.use(keycloak.middleware());
 
 const port = process.env.PORT || 3001;
 
@@ -72,68 +87,6 @@ app.get('/tl/:id', (req, res) => {
   }
 
   res.send('Project details and remark form');
-});
-
-// Fetch TL details along with their projects and members
-app.get('/api/tl-details', async (req, res) => {
-  let client;
-  try {
-    client = await pool.connect();
-    const query = `
-      WITH group_projects AS (
-        SELECT
-            gu.group_id AS group_id,
-            u.id AS tl_id,
-            u.lastname AS groupname,
-            array_agg(u2.login) AS group_members,
-            p.id AS project_id,
-            p.name AS projectname
-        FROM
-            groups_users gu
-        JOIN
-            users u ON gu.group_id = u.id
-        JOIN
-            users u2 ON gu.user_id = u2.id
-        JOIN
-            members m ON gu.user_id = m.user_id
-        JOIN
-            projects p ON m.project_id = p.id
-        WHERE
-            u.lastname LIKE '%-TL'
-        GROUP BY
-            gu.group_id, u.id, u.lastname, p.id, p.name
-      )
-      SELECT
-          gp.project_id,
-          gp.projectname AS project_name,
-          gp.group_id,
-          gp.tl_id,
-          gp.groupname AS tl_name,
-          gp.group_members AS group_members,
-          array_agg(DISTINCT u.login) AS all_project_members
-      FROM
-          group_projects gp
-      JOIN
-          members m ON gp.project_id = m.project_id
-      JOIN
-          users u ON m.user_id = u.id
-      GROUP BY
-          gp.project_id, gp.projectname, gp.group_id, gp.tl_id, gp.groupname, gp.group_members
-      ORDER BY
-          gp.projectname;
-    `;
-
-    const result = await client.query(query);
-    const data = result.rows;
-    res.send(data);
-  } catch (err) {
-    console.error('Error fetching TL details', err);
-    res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    if (client) {
-      client.release();
-    }
-  }
 });
 
 app.get('/api/data', async (req, res) => {

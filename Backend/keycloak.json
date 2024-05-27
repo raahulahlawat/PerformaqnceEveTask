@@ -1,0 +1,12 @@
+{
+    "realm": "performance",
+    "auth-server-url": "http://localhost:8080/auth",
+    "ssl-required": "none",
+    "resource": "performclient",
+    "credentials": {
+      "secret": "vvvJdhrIUQgP19qALcc0hzQUcZZIJhNH"
+    },
+    "confidential-port": 0,
+    "public-client": true
+  }
+  

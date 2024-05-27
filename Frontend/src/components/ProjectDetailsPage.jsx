@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 import './css/project.css';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,22 +20,14 @@ const ProjectDetailsPage = () => {
 
   const fetchProjectDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/project/${fidi}`);
-      console.log("Project Details Response:", response.data);
-      console.log("Fetching project details for ID:", fidi);
+      const response = await axiosInstance.get(`/project/${fidi}`);
       setPartProject(response.data);
 
-      const membersResponse = await axios.get(`http://localhost:3001/project/${fidi}/members`);
-      console.log("Members Response:", membersResponse.data);
+      const membersResponse = await axiosInstance.get(`/project/${fidi}/members`);
       setMembers(membersResponse.data.projectMembers);
 
-      const tlsResponse = await axios.get(`http://localhost:3001/project/${fidi}/tls`);
-      console.log("TLs Response:", tlsResponse.data);
-      if (tlsResponse.data) {
-        setTlList(tlsResponse.data);
-      } else {
-        console.error("TLs data is undefined");
-      }
+      const tlsResponse = await axiosInstance.get(`/project/${fidi}/tls`);
+      setTlList(tlsResponse.data);
     } catch (error) {
       console.error('Error fetching project details:', error);
     }
@@ -48,12 +40,11 @@ const ProjectDetailsPage = () => {
 
   const getCurrentMonth = () => {
     const currentDate = new Date();
-    const currentMonthIndex = currentDate.getMonth();
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    return monthNames[currentMonthIndex];
+    return monthNames[currentDate.getMonth()];
   };
 
   const handleTlChange = async (e) => {
@@ -61,15 +52,8 @@ const ProjectDetailsPage = () => {
     setSelectedMember('');
 
     try {
-      const response = await axios.get(`http://localhost:3001/project/${fidi}/tls/${e.target.value}/members`);
-      console.log("TL Members Response:", response.data);
-      if (response.data && response.data.tlMembers) {
-        console.log("TL members found:", response.data.tlMembers);
-        setTlMembers(response.data.tlMembers);
-      } else {
-        console.error("TL members data is undefined");
-        setTlMembers([]);
-      }
+      const response = await axiosInstance.get(`/project/${fidi}/tls/${e.target.value}/members`);
+      setTlMembers(response.data.tlMembers);
     } catch (error) {
       console.error('Error fetching TL members:', error);
     }
@@ -84,18 +68,14 @@ const ProjectDetailsPage = () => {
       }
 
       const projectName = partproject.name || 'the project';
-      const uniqueId = uuidv4(); // Generate a unique identifier
-      // const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // Set expiration time to 24 hours from now
-      const expirationTime = new Date(Date.now() + 30 * 1000).toISOString(); 
+      const uniqueId = uuidv4();
+      const expirationTime = new Date(Date.now() + 30 * 1000).toISOString();
 
-      // Send email to the selected member
-      await axios.post('http://localhost:3001/send-email', {
+      await axiosInstance.post('/send-email', {
         recipientEmail: selectedMember,
         subject: 'Provide Remarks for Project Members',
         text: `Dear Team Member,\n\nYou have been assigned to review the project '${projectName}'.\n\nPlease provide your remarks for the project.\n\nThank you.\n\nLink to project: http://localhost:5173/tl/${fidi}?id=${uniqueId}&expires=${expirationTime}`
       });
-
-      console.log('Email Sent');
 
       navigate('/assign-ticket');
     } catch (error) {
