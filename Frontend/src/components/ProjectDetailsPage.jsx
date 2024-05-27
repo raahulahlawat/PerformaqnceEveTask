@@ -15,18 +15,22 @@ const ProjectDetailsPage = () => {
   const [selectedTl, setSelectedTl] = useState('');
   const [tlMembers, setTlMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
   const [currentMonth, setCurrentMonth] = useState('');
   const navigate = useNavigate();
 
   const fetchProjectDetails = async () => {
     try {
       const response = await axiosInstance.get(`/project/${fidi}`);
+      console.log('Project details:', response.data);
       setPartProject(response.data);
 
       const membersResponse = await axiosInstance.get(`/project/${fidi}/members`);
+      console.log('Project members:', membersResponse.data);
       setMembers(membersResponse.data.projectMembers);
 
       const tlsResponse = await axiosInstance.get(`/project/${fidi}/tls`);
+      console.log('Team leads:', tlsResponse.data);
       setTlList(tlsResponse.data);
     } catch (error) {
       console.error('Error fetching project details:', error);
@@ -35,16 +39,23 @@ const ProjectDetailsPage = () => {
 
   useEffect(() => {
     fetchProjectDetails();
-    setCurrentMonth(getCurrentMonth());
-  }, []);
+    if (selectedDate) {
+      setCurrentMonth(getMonthFromDate(selectedDate));
+    }
+  }, [selectedDate]);
 
   const getCurrentMonth = () => {
     const currentDate = new Date();
+    return getMonthFromDate(currentDate);
+  };
+
+  const getMonthFromDate = (date) => {
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    return monthNames[currentDate.getMonth()];
+    const dateObj = new Date(date);
+    return monthNames[dateObj.getMonth()];
   };
 
   const handleTlChange = async (e) => {
@@ -53,6 +64,7 @@ const ProjectDetailsPage = () => {
 
     try {
       const response = await axiosInstance.get(`/project/${fidi}/tls/${e.target.value}/members`);
+      console.log('Team lead members:', response.data);
       setTlMembers(response.data.tlMembers);
     } catch (error) {
       console.error('Error fetching TL members:', error);
@@ -77,6 +89,7 @@ const ProjectDetailsPage = () => {
         text: `Dear Team Member,\n\nYou have been assigned to review the project '${projectName}'.\n\nPlease provide your remarks for the project.\n\nThank you.\n\nLink to project: http://localhost:5173/tl/${fidi}?id=${uniqueId}&expires=${expirationTime}`
       });
 
+      console.log('Email sent successfully.');
       navigate('/assign-ticket');
     } catch (error) {
       console.error('Error sending emails:', error);
@@ -84,13 +97,24 @@ const ProjectDetailsPage = () => {
     }
   };
 
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+    console.log('Selected date:', e.target.value);
+  };
+
   return (
     <div>
       <Navbar />
-      <ul className='project-name'>
-        <h3>Current Month: {currentMonth}</h3>
-        <span className='heading-project'> Project Name: &nbsp;{partproject.name}</span>
-      </ul>
+      <div>
+        <label className='member'>Select Date:</label>
+        <input className='select-date-input' type="date" value={selectedDate} onChange={handleDateChange} required />
+      </div>
+      {selectedDate && (
+        <ul className='project-name'>
+          <h3>Current Month: {getMonthFromDate(selectedDate)}</h3>
+          <span className='heading-project'> Project Name: &nbsp;{partproject.name}</span>
+        </ul>
+      )}
       <div>
         <h3 className='member'>Members of the Project:</h3>
         <ul className='members'>
