@@ -306,34 +306,92 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
   }
 });
 
+const getProjectMembers = async (projectId) => {
+  const membersQuery = `
+    SELECT 
+      m.id AS member_id, 
+      u.firstname || ' ' || u.lastname AS member_name
+    FROM 
+      members m 
+    INNER JOIN 
+      users u 
+    ON 
+      m.user_id = u.id 
+    WHERE 
+      m.project_id = $1
+  `;
+  const { rows: projectMembers } = await pool.query(membersQuery, [parseInt(projectId, 10)]);
+  const memberNames = {};
+  projectMembers.forEach(row => {
+    memberNames[row.member_id] = row.member_name;
+  });
+  return memberNames;
+};
+
 app.post('/project/:id/remarks', async (req, res) => {
+  let client;
   try {
+    client = await pool.connect();
     const { id: projectId } = req.params;
     const { remarks } = req.body;
 
-    // Validate remarks
-    const isValidRemarks = Object.values(remarks).every(remark => /^[0-5]$/.test(remark));
-    if (!isValidRemarks) {
-      return res.status(400).json({ message: 'Invalid remarks. Remarks must be digits from 0 to 5.' });
-    }
+    console.log('Received remarks:', remarks);
 
-    // Your logic to store remarks in the database goes here...
-    // For example, if you have a database table named 'project_remarks' with columns 'project_id', 'member_id', and 'remark':
+    const date = new Date();
+    const projectNameQuery = 'SELECT name FROM projects WHERE id = $1';
+    const projectNameResult = await pool.query(projectNameQuery, [projectId]);
+    const projectName = projectNameResult.rows[0].name;
+
+    console.log('Project name:', projectName);
+
+    // Fetch member names dynamically
+    const memberNames = await getProjectMembers(projectId);
+    console.log('Member names:', memberNames);
+
+    // Transform remarks into the expected format
+    const transformedRemarks = {};
+    Object.entries(remarks).forEach(([key, value]) => {
+      const [memberId, remarkIndex] = key.split('_');
+      if (!transformedRemarks[memberId]) {
+        transformedRemarks[memberId] = [];
+      }
+      transformedRemarks[memberId][remarkIndex] = value;
+    });
+
+    console.log('Transformed remarks:', transformedRemarks);
+
     // Insert each remark into the database
-    const insertQueries = Object.entries(remarks).map(([memberId, remark]) => {
-      return pool.query('INSERT INTO project_remarks (project_id, member_id, remark) VALUES ($1, $2, $3)', [projectId, memberId, remark]);
+    const insertQueries = Object.entries(transformedRemarks).map(([memberId, remarks]) => {
+      return pool.query(
+        'INSERT INTO project_remarks (Date, Project_Name, Member_Name, Remark_1, Remark_2, Remark_3, Remark_4, Remark_5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', 
+        [
+          date,
+          projectName,
+          memberNames[memberId],
+          remarks[0] || null,
+          remarks[1] || null,
+          remarks[2] || null,
+          remarks[3] || null,
+          remarks[4] || null,
+        ]
+      );
     });
 
     // Execute all insert queries
     await Promise.all(insertQueries);
 
     res.status(200).json({ message: 'Remarks stored successfully' });
-    console.log ('Remarks Stored')
+    console.log('Remarks Stored');
   } catch (error) {
     console.error('Error storing remarks:', error);
     res.status(500).json({ message: 'Failed to store remarks' });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 });
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

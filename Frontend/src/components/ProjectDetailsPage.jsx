@@ -9,7 +9,6 @@ const ProjectDetailsPage = () => {
   const url = new URL(window.location.href);
   const projectId = url.pathname.split('/')[2];
   const readOnlyMode = url.searchParams.has('readOnly');
-
   const [partproject, setPartProject] = useState({});
   const [members, setMembers] = useState([]);
   const [tlList, setTlList] = useState([]);
@@ -100,15 +99,32 @@ const ProjectDetailsPage = () => {
     }
   };
 
+  // const storeRemarks = async () => {
+  //   try {
+  //     await axiosInstance.post(`/project/${projectId}/remarks`, { remarks });
+  //     alert('Remarks stored successfully');
+  //     console.log('Remarks stored successfully');
+  //     console.log('Data:', data);
+  //   } catch (error) {
+  //     console.error('Error storing remarks:', error);
+  //     alert('Failed to store remarks. Please try again later.');
+  //   }
+  // };
+  
   const storeRemarks = async () => {
+    let data; // Define the data variable
     try {
       const response = await axiosInstance.post(`/project/${projectId}/remarks`, { remarks });
-      alert('Remarks stored successfully');
+      data = response.data; // Assign a value to the data variable if needed
+      console.log("Remarks stored successfully");
+      console.log('Data:', remarks);
+      // Add any additional logic here
     } catch (error) {
       console.error('Error storing remarks:', error);
       alert('Failed to store remarks. Please try again later.');
     }
   };
+  
 
   const sendEmailWithLink = async (link) => {
     try {
@@ -153,51 +169,53 @@ const ProjectDetailsPage = () => {
         </ul>
       )}
       <div>
-      {readOnlyMode ? (
-  <div>
-    <h3 className='member'>Members of the Project:</h3>
-    <table className='members-table'>
-      <thead>
-        <tr>
-          <th className='number-column'>#</th>
-          <th>Member Name</th>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <th key={i}>Remarks {i + 1}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {members.map((member, index) => (
-          <tr key={member.id}>
-            <td>{index + 1}</td>
-            <td>{member.firstname} {member.lastname}</td>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <td key={i}>
-                <select
-                  value={remarks[`${member.id}_${i}`] || '0'}
-                  onChange={(e) => handleRemarkChange(member.id, i, e.target.value)}
-                >
-                  {Array.from({ length: 6 }).map((_, num) => (
-                    <option key={num} value={num}>{num}</option>
+        {readOnlyMode ? (
+          <div>
+            <h3 className='member'>Members of the Project:</h3>
+            <table className='members-table'>
+              <thead>
+                <tr>
+                  <th className='number-column'>#</th>
+                  <th>Member Name</th>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <th key={i}>Remarks {i + 1}</th>
                   ))}
-                </select>
-              </td>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((member, index) => (
+                  <tr key={member.id}>
+                    <td>{index + 1}</td>
+                    <td>{member.firstname} {member.lastname}</td>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <td key={i}>
+                        <select
+                          value={remarks[`${member.id}_${i}`] || '0'}
+                          onChange={(e) => handleRemarkChange(member.id, i, e.target.value)}
+                        >
+                          {Array.from({ length: 6 }).map((_, num) => (
+                            <option key={num} value={num}>{num}</option>
+                          ))}
+                        </select>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button className='assign' onClick={handleSubmit} disabled={!readOnlyMode}>Submit</button>
+            <br />
+            <br />
+          </div>
+        ) : (
+          <ul className='members'>
+            {members.map((member, index) => (
+              <li key={member.id}>
+                {index + 1}. {member.firstname} {member.lastname}
+              </li>
             ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    <button className='assign' onClick={handleSubmit} disabled={!readOnlyMode}>Submit</button>
-  </div>
-) : (
-  <ul className='members'>
-    {members.map((member, index) => (
-      <li key={member.id}>
-        {index + 1}. {member.firstname} {member.lastname}
-      </li>
-    ))}
-  </ul>
-)}
+          </ul>
+        )}
         {!readOnlyMode && (
           <form onSubmit={handleSubmit}>
             <div>
@@ -221,6 +239,8 @@ const ProjectDetailsPage = () => {
               </div>
             )}
             <button className='assign' type="submit">Submit</button>
+            <br />
+            <br />
           </form>
         )}
       </div>
