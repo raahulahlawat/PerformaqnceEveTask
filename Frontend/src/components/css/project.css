@@ -1,3 +1,29 @@
+.members-table {
+    /* width: 100%; */
+    border-collapse: collapse;
+  }
+  
+  .members-table th, .members-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .members-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .members-table input[type="number"] {
+    /* width: 50px; */
+    padding: 5px;
+    text-align: center;
+  }
+  
+  .members-table input[type="number"]:read-only {
+    background-color: #f2f2f2;
+  }
+  
+
 .project-name {
     font-size: 30px;
     font-weight: bolder;
@@ -64,3 +90,16 @@
     margin-top: -10px;
     border-radius: 2px;
 }
+
+.selected-date {
+    margin-left: 10px;
+    border-radius: 2px;
+  }
+
+  .members li input[type="number"] {
+    margin-left: 10px;
+    width: 100px;
+    padding: 5px;
+  }
+
+  

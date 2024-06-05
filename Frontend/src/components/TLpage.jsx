@@ -1,65 +1,156 @@
-// import React, { useState, useEffect } from 'react';
+// // import React, { useState, useEffect } from 'react';
+// // import axios from 'axios';
+// // import Navbar from './Navbar';
+
+// // const TLPage = () => {
+// //   const [selectedProject, setSelectedProject] = useState(null);
+// //   const [error, setError] = useState(null);
+// //   const [isDirectEmail, setIsDirectEmail] = useState(false);
+
+// //   useEffect(() => {
+// //     const projectId = window.location.pathname.split('/').pop();
+// //     fetchProjectDetails(projectId);
+// //   }, []);
+
+// //   const fetchProjectDetails = async (projectId) => {
+// //     try {
+// //       const response = await axios.get(`http://localhost:3001/api/tl/project/${projectId}`);
+// //       setSelectedProject(response.data);
+// //     } catch (error) {
+// //       console.error('Error fetching project details:', error);
+// //       setError('Failed to fetch project details. Please try again later.');
+// //     }
+// //   };
+
+// //   const handleSendEmail = async () => {
+// //     // Logic to send email
+// //     setIsDirectEmail(true); // Set flag to indicate direct email
+// //   };
+
+// //   if (error) {
+// //     return <div>Error: {error}</div>;
+// //   }
+
+// //   return (
+// //     <div>
+// //       <Navbar />
+// //       {selectedProject && (
+// //         <div>
+// //           <h2>Performance Tracker</h2>
+// //           <p>Select Date: {selectedProject.date}</p>
+// //           <h3>Members of the Project:</h3>
+// //           <ul>
+// //             {selectedProject.members.map((member) => (
+// //               <li key={member.id}>
+// //                 {member.firstname} {member.lastname}
+// //               </li>
+// //             ))}
+// //           </ul>
+// //           {!isDirectEmail && (
+// //             <div>
+// //               {/* <p>Select Team Lead:</p>
+// //               <select>
+// //                 Render TL options here
+// //               </select> */}
+// //             </div>
+// //           )}
+// //           <button onClick={handleSendEmail}>Send Email</button>
+// //         </div>
+// //       )}
+// //     </div>
+// //   );
+// // };
+
+// // export default TLPage;
+
+
+// // import React, { useState, useEffect } from 'react';
+// // import axios from 'axios';
+// // import Navbar from './Navbar';
+
+// // const TLPage = () => {
+// //   const [project, setProject] = useState(null);
+// //   const [error, setError] = useState(null);
+
+// //   useEffect(() => {
+// //     const uniqueId = window.location.pathname.split('/').pop();
+// //     fetchProjectDetails(uniqueId);
+// //   }, []);
+
+// //   const fetchProjectDetails = async (uniqueId) => {
+// //     try {
+// //       const response = await axios.get(`http://localhost:3001/api/tl/project/${uniqueId}`);
+// //       setProject(response.data);
+// //     } catch (error) {
+// //       console.error('Error fetching project details:', error);
+// //       setError('Failed to fetch project details. Please try again later.');
+// //     }
+// //   };
+
+// //   if (error) {
+// //     return <div>Error: {error}</div>;
+// //   }
+
+// //   return (
+// //     <div>
+// //       <Navbar />
+// //       {project && (
+// //         <div>
+// //           <h2>Performance Tracker</h2>
+// //           <h3>Project: {project.project}</h3>
+// //           <h3>Members of the Project:</h3>
+// //           <ul>
+// //             {project.members.map((member) => (
+// //               <li key={member.id}>
+// //                 {member.firstname} {member.lastname}
+// //               </li>
+// //             ))}
+// //           </ul>
+// //         </div>
+// //       )}
+// //     </div>
+// //   );
+// // };
+
+// // export default TLPage;
+
+// import React, { useEffect, useState } from 'react';
 // import axios from 'axios';
-// import Navbar from './Navbar';
 
 // const TLPage = () => {
-//   const [selectedProject, setSelectedProject] = useState(null);
-//   const [remarks, setRemarks] = useState({});
+//   const [projectDetails, setProjectDetails] = useState(null);
+//   const uniqueId = 'YOUR_UNIQUE_ID'; // Replace 'YOUR_UNIQUE_ID' with the actual unique ID
 
 //   useEffect(() => {
-//     const projectId = window.location.pathname.split('/').pop();
-//     fetchProjectDetails(projectId);
-//   }, []);
+//     const fetchProjectDetails = async () => {
+//       try {
+//         console.log('Unique ID:', uniqueId); // Log the unique ID
+//         const response = await axios.get(`/api/tl/project/${uniqueId}`);
+//         console.log('Response:', response.data); // Log the response data
+//         setProjectDetails(response.data);
+//       } catch (error) {
+//         console.error('Error fetching project details:', error);
+//       }
+//     };
 
-//   const fetchProjectDetails = async (projectId) => {
-//     try {
-//       const response = await axios.get(`http://localhost:3001/api/tl/project/${projectId}`);
-//       setSelectedProject(response.data);
-//     } catch (error) {
-//       console.error('Error fetching project details:', error);
-//     }
-//   };
-
-//   const handleRemarksChange = (memberId, e) => {
-//     setRemarks({
-//       ...remarks,
-//       [memberId]: e.target.value,
-//     });
-//   };
-
-//   const handleRemarksSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const projectId = window.location.pathname.split('/').pop();
-//       await axios.post(`http://localhost:3001/api/tl/project/${projectId}/remarks`, { remarks });
-//       alert('Remarks submitted successfully');
-//     } catch (error) {
-//       console.error('Error submitting remarks:', error);
-//       alert('Failed to submit remarks. Please try again later.');
-//     }
-//   };
+//     fetchProjectDetails();
+//   }, [uniqueId]);
 
 //   return (
 //     <div>
-//       <Navbar />
-//       {selectedProject && (
+//       {projectDetails ? (
 //         <div>
-//           <h2>Project Name: {selectedProject.name}</h2>
+//           <h2>Project Details</h2>
+//           <p>Project Name: {projectDetails.project}</p>
+//           <h3>Members:</h3>
 //           <ul>
-//             {selectedProject.members.map((member) => (
-//               <li key={member.id}>
-//                 {member.firstname} {member.lastname} -{' '}
-//                 <input
-//                   type="text"
-//                   placeholder="Enter remarks"
-//                   value={remarks[member.id] || ''}
-//                   onChange={(e) => handleRemarksChange(member.id, e)}
-//                 />
-//               </li>
+//             {projectDetails.members && projectDetails.members.map(member => (
+//               <li key={member.id}>{member.firstname} {member.lastname}</li>
 //             ))}
 //           </ul>
-//           <button onClick={handleRemarksSubmit}>Submit Remarks</button>
 //         </div>
+//       ) : (
+//         <p>Loading project details...</p>
 //       )}
 //     </div>
 //   );
@@ -70,71 +161,41 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Navbar from './Navbar';
 
 const TLPage = () => {
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [remarks, setRemarks] = useState({});
-  const [error, setError] = useState(null);
+  const [projectDetails, setProjectDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const projectId = window.location.pathname.split('/').pop();
-    fetchProjectDetails(projectId);
+    const fetchProjectDetails = async () => {
+      try {
+        const response = await axios.get('/api/tl/project');
+        setProjectDetails(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching project details:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchProjectDetails();
   }, []);
-
-  const fetchProjectDetails = async (projectId) => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/tl/project/${projectId}`);
-      setSelectedProject(response.data);
-    } catch (error) {
-      console.error('Error fetching project details:', error);
-      setError('Failed to fetch project details. Please try again later.');
-    }
-  };
-
-  const handleRemarksChange = (memberId, e) => {
-    setRemarks({
-      ...remarks,
-      [memberId]: e.target.value,
-    });
-  };
-
-  const handleRemarksSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const projectId = window.location.pathname.split('/').pop();
-      await axios.post(`http://localhost:3001/api/tl/project/${projectId}/remarks`, { remarks });
-      alert('Remarks submitted successfully');
-    } catch (error) {
-      console.error('Error submitting remarks:', error);
-      alert('Failed to submit remarks. Please try again later.');
-    }
-  };
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
     <div>
-      <Navbar />
-      {selectedProject && (
+      <h1>TL Page</h1>
+      {loading && <p>Loading project details...</p>}
+      {projectDetails && (
         <div>
-          <h2>Project Name: {selectedProject.name}</h2>
+          <h2>Project Name: {projectDetails.project}</h2>
+          <h3>Members:</h3>
           <ul>
-            {selectedProject.members.map((member) => (
+            {projectDetails.members.map(member => (
               <li key={member.id}>
-                {member.firstname} {member.lastname} -{' '}
-                <input
-                  type="text"
-                  placeholder="Enter remarks"
-                  value={remarks[member.id] || ''}
-                  onChange={(e) => handleRemarksChange(member.id, e)}
-                />
+                {member.firstname} {member.lastname}
               </li>
             ))}
           </ul>
-          <button onClick={handleRemarksSubmit}>Submit Remarks</button>
         </div>
       )}
     </div>

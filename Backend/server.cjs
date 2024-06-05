@@ -6,6 +6,9 @@ const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 const app = express();
 // const { v4: uuidv4 } = require('uuid');
+const morgan = require('morgan');
+
+app.use(morgan('dev'));
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -20,6 +23,7 @@ const pool = new Pool({
   port: 5432,
 });
 
+// Set up session store
 const memoryStore = new session.MemoryStore();
 app.use(session({
   secret: 'vvvJdhrIUQgP19qALcc0hzQUcZZIJhNH',
@@ -28,6 +32,7 @@ app.use(session({
   store: memoryStore
 }));
 
+// Initialize Keycloak
 const keycloakConfig = require('./keycloak.json');
 const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
 app.use(keycloak.middleware());
@@ -35,6 +40,7 @@ app.use(keycloak.middleware());
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
+// app.use('/api', require('./routes/api'));
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -106,6 +112,30 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
+// app.get('/project/:id', async (req, res) => {
+//   let client;
+//   try {
+//     client = await pool.connect();
+//     const id = req.params.id;
+
+//     if (!id || isNaN(id)) {
+//       res.status(400).send('Invalid project ID');
+//       return;
+//     }
+
+//     const result = await client.query('SELECT * FROM projects WHERE id = $1', [parseInt(id, 10)]);
+//     const data = result.rows[0];
+//     res.send(data);
+//   } catch (error) {
+//     console.error('Error fetching project details:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   } finally {
+//     if (client) {
+//       client.release();
+//     }
+//   }
+// });
+
 app.get('/project/:id', async (req, res) => {
   let client;
   try {
@@ -113,13 +143,22 @@ app.get('/project/:id', async (req, res) => {
     const id = req.params.id;
 
     if (!id || isNaN(id)) {
+      console.log('Invalid project ID');
       res.status(400).send('Invalid project ID');
       return;
     }
 
+    console.log(`Fetching project with ID: ${id}`);
     const result = await client.query('SELECT * FROM projects WHERE id = $1', [parseInt(id, 10)]);
     const data = result.rows[0];
-    res.send(data);
+
+    if (data) {
+      console.log('Fetched data:', data);
+      res.json(data);
+    } else {
+      console.log('No data found for the given ID');
+      res.status(404).send('No data found');
+    }
   } catch (error) {
     console.error('Error fetching project details:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -129,6 +168,8 @@ app.get('/project/:id', async (req, res) => {
     }
   }
 });
+
+
 
 app.get('/project/:id/members', async (req, res) => {
   let client;
