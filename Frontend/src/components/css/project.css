@@ -1,28 +1,31 @@
 .members-table {
-    /* width: 100%; */
+    width: 100%;
     border-collapse: collapse;
-  }
-  
-  .members-table th, .members-table td {
+}
+
+.members-table th, .members-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-  }
-  
-  .members-table th {
+}
+
+.members-table th {
     background-color: #f2f2f2;
-  }
-  
-  .members-table input[type="number"] {
-    /* width: 50px; */
+}
+
+.number-column {
+    width: 30px; /* Set the desired width */
+    text-align: center; /* Align text to the center */
+}
+
+.members-table input[type="number"] {
     padding: 5px;
     text-align: center;
-  }
-  
-  .members-table input[type="number"]:read-only {
+}
+
+.members-table input[type="number"]:read-only {
     background-color: #f2f2f2;
-  }
-  
+}
 
 .project-name {
     font-size: 30px;
@@ -49,7 +52,7 @@
     display: flex;
 }
 
-.assign{
+.assign {
     background-color: teal;
     border-radius: 5px;
     padding: 5px;
@@ -59,11 +62,11 @@
     width: 80px;
 }
 
-.assign:hover{
+.assign:hover {
     background-color: rgb(97, 184, 62);
 }
 
-.tl-dropdown{
+.tl-dropdown {
     border: 1px solid black;
     width: 170px;
     margin-left: 10px;
@@ -71,7 +74,7 @@
     border-radius: 2px;
 }
 
-.tl-member-dropdown{
+.tl-member-dropdown {
     border: 1px solid black;
     width: 170px;
     margin-left: 10px;
@@ -79,11 +82,11 @@
     border-radius: 2px;
 }
 
-.tl{
+.tl {
     margin-left: 15px;
 }
 
-.select-date-input{
+.select-date-input {
     border: 1px solid black;
     width: 170px;
     margin-left: 10px;
@@ -93,13 +96,13 @@
 
 .selected-date {
     margin-left: 10px;
-    border-radius: 2px;
-  }
+    font-size: 25px;
+    font-weight: bold;
 
-  .members li input[type="number"] {
+}
+
+.members li input[type="number"] {
     margin-left: 10px;
     width: 100px;
     padding: 5px;
-  }
-
-  
+}

@@ -4,15 +4,17 @@ const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
-const app = express();
-// const { v4: uuidv4 } = require('uuid');
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
 
-app.use(morgan('dev'));
+const app = express();
+const port = process.env.PORT || 3001;
 
+app.use(morgan('dev'));
+app.use(bodyParser.json());
 app.use(cors({
   origin: 'http://localhost:5173',
-  credentials: true 
+  credentials: true
 }));
 
 const pool = new Pool({
@@ -37,10 +39,7 @@ const keycloakConfig = require('./keycloak.json');
 const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
 app.use(keycloak.middleware());
 
-const port = process.env.PORT || 3001;
-
 app.use(express.json());
-// app.use('/api', require('./routes/api'));
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -61,7 +60,6 @@ async function sendEmail(recipientEmail, subject, text) {
     subject: subject,
     text: text
   };
-
 
   let info = await transporter.sendMail(mailOptions);
   console.log('Email sent:', info.response);
@@ -112,30 +110,6 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
-// app.get('/project/:id', async (req, res) => {
-//   let client;
-//   try {
-//     client = await pool.connect();
-//     const id = req.params.id;
-
-//     if (!id || isNaN(id)) {
-//       res.status(400).send('Invalid project ID');
-//       return;
-//     }
-
-//     const result = await client.query('SELECT * FROM projects WHERE id = $1', [parseInt(id, 10)]);
-//     const data = result.rows[0];
-//     res.send(data);
-//   } catch (error) {
-//     console.error('Error fetching project details:', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   } finally {
-//     if (client) {
-//       client.release();
-//     }
-//   }
-// });
-
 app.get('/project/:id', async (req, res) => {
   let client;
   try {
@@ -168,8 +142,6 @@ app.get('/project/:id', async (req, res) => {
     }
   }
 });
-
-
 
 app.get('/project/:id/members', async (req, res) => {
   let client;
@@ -331,6 +303,35 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
     if (client) {
       client.release();
     }
+  }
+});
+
+app.post('/project/:id/remarks', async (req, res) => {
+  try {
+    const { id: projectId } = req.params;
+    const { remarks } = req.body;
+
+    // Validate remarks
+    const isValidRemarks = Object.values(remarks).every(remark => /^[0-5]$/.test(remark));
+    if (!isValidRemarks) {
+      return res.status(400).json({ message: 'Invalid remarks. Remarks must be digits from 0 to 5.' });
+    }
+
+    // Your logic to store remarks in the database goes here...
+    // For example, if you have a database table named 'project_remarks' with columns 'project_id', 'member_id', and 'remark':
+    // Insert each remark into the database
+    const insertQueries = Object.entries(remarks).map(([memberId, remark]) => {
+      return pool.query('INSERT INTO project_remarks (project_id, member_id, remark) VALUES ($1, $2, $3)', [projectId, memberId, remark]);
+    });
+
+    // Execute all insert queries
+    await Promise.all(insertQueries);
+
+    res.status(200).json({ message: 'Remarks stored successfully' });
+    console.log ('Remarks Stored')
+  } catch (error) {
+    console.error('Error storing remarks:', error);
+    res.status(500).json({ message: 'Failed to store remarks' });
   }
 });
 
