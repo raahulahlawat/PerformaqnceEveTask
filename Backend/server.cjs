@@ -13,7 +13,7 @@ const port = process.env.PORT || 3001;
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://rahul-ahlawat.io:5173',
   credentials: true
 }));
 
@@ -69,7 +69,7 @@ app.post('/send-email', async (req, res) => {
   try {
     const { recipientEmail, subject, text } = req.body;
 
-    const urlParams = new URLSearchParams(text.split('http://localhost:5173/tl/')[1]);
+    const urlParams = new URLSearchParams(text.split('http://rahul-ahlawat.io:5173')[1]);
     const uniqueId = urlParams.get('id');
     const expires = urlParams.get('expires');
     emailLinks[uniqueId] = expires;
@@ -398,6 +398,6 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something went wrong!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is walking on port ${port} because it is very much tired to run`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`);
 });

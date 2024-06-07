@@ -1,17 +1,15 @@
-// src/utils/axiosInstance.js
-
 import axios from 'axios';
 import keycloak from './keycloak';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3001', // Backend API URL
+  baseURL: 'http://rahul-ahlawat.io:3001',
   withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(
   async config => {
     if (keycloak.token) {
-      await keycloak.updateToken(5); // Refresh the token if it expires within 5 seconds
+      await keycloak.updateToken(5);
       config.headers.Authorization = `Bearer ${keycloak.token}`;
     }
     return config;

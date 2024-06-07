@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './css/home.css';
-import { RotatingLines } from 'react-loader-spinner';
 import {
   Button, ButtonGroup, Menu,
   MenuButton,
@@ -22,7 +21,7 @@ const Home = () => {
   }
 
   useEffect(() => {
-    axios.get('http://localhost:3001/api/data')
+    axios.get('http://rahul-ahlawat.io:3001/api/data')
       .then((res) => {
         setProjects(res.data)
         setLoading(false);

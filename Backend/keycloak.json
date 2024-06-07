@@ -1,6 +1,6 @@
 {
     "realm": "performance",
-    "auth-server-url": "http://localhost:8080/auth",
+    "auth-server-url": "http://rahul-ahlawat.io:8080/auth",
     "ssl-required": "none",
     "resource": "performclient",
     "credentials": {

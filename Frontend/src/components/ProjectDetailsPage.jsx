@@ -24,12 +24,15 @@ const ProjectDetailsPage = () => {
   const fetchProjectDetails = async () => {
     try {
       const response = await axiosInstance.get(`/project/${projectId}`);
+      console.log('Project Details:', response.data);
       setPartProject(response.data);
 
       const membersResponse = await axiosInstance.get(`/project/${projectId}/members`);
+      console.log('Project Members:', membersResponse.data.projectMembers);
       setMembers(membersResponse.data.projectMembers);
 
       const tlsResponse = await axiosInstance.get(`/project/${projectId}/tls`);
+      console.log('TL List:', tlsResponse.data);
       setTlList(tlsResponse.data);
     } catch (error) {
       console.error('Error fetching project details:', error);
@@ -40,6 +43,8 @@ const ProjectDetailsPage = () => {
     fetchProjectDetails();
     if (selectedDate) {
       setCurrentMonth(getMonthFromDate(selectedDate));
+      console.log('Selected Date:', selectedDate);
+      console.log('Current Month:', getMonthFromDate(selectedDate));
     }
   }, [selectedDate]);
 
@@ -52,6 +57,10 @@ const ProjectDetailsPage = () => {
       setSelectedDate(readOnlyDate);
       setSelectedTl(readOnlyTl);
       setSelectedMember(readOnlyMember);
+      console.log('Read-Only Mode:', readOnlyMode);
+      console.log('Read-Only Date:', readOnlyDate);
+      console.log('Read-Only TL:', readOnlyTl);
+      console.log('Read-Only Member:', readOnlyMember);
     }
   }, [readOnlyMode]);
 
@@ -65,11 +74,14 @@ const ProjectDetailsPage = () => {
   };
 
   const handleTlChange = async (e) => {
-    setSelectedTl(e.target.value);
+    const selectedTlValue = e.target.value;
+    setSelectedTl(selectedTlValue);
     setSelectedMember('');
+    console.log('Selected Team Lead:', selectedTlValue);
 
     try {
-      const response = await axiosInstance.get(`/project/${projectId}/tls/${e.target.value}/members`);
+      const response = await axiosInstance.get(`/project/${projectId}/tls/${selectedTlValue}/members`);
+      console.log('TL Members:', response.data.tlMembers);
       setTlMembers(response.data.tlMembers);
     } catch (error) {
       console.error('Error fetching TL members:', error);
@@ -78,6 +90,11 @@ const ProjectDetailsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Submit Clicked');
+    console.log('Selected Member:', selectedMember);
+    console.log('Selected Date:', selectedDate);
+    console.log('Selected TL:', selectedTl);
+
     try {
       if (!selectedMember) {
         alert('Please select a team member.');
@@ -86,7 +103,8 @@ const ProjectDetailsPage = () => {
 
       const uniqueId = uuidv4();
       const expirationTime = new Date(Date.now() + 30 * 60 * 1000).toISOString();
-      const readOnlyLink = `http://localhost:5173/project/${projectId}?id=${uniqueId}&expires=${expirationTime}&selectedDate=${selectedDate}&selectedTl=${selectedTl}&selectedMember=${selectedMember}&readOnly=true`;
+      const readOnlyLink = `http://rahul-ahlawat.io:5173/project/${projectId}?id=${uniqueId}&expires=${expirationTime}&selectedDate=${selectedDate}&selectedTl=${selectedTl}&selectedMember=${selectedMember}&readOnly=true`;
+      console.log('Read-Only Link:', readOnlyLink);
 
       if (readOnlyMode) {
         await storeRemarks();
@@ -99,32 +117,16 @@ const ProjectDetailsPage = () => {
     }
   };
 
-  // const storeRemarks = async () => {
-  //   try {
-  //     await axiosInstance.post(`/project/${projectId}/remarks`, { remarks });
-  //     alert('Remarks stored successfully');
-  //     console.log('Remarks stored successfully');
-  //     console.log('Data:', data);
-  //   } catch (error) {
-  //     console.error('Error storing remarks:', error);
-  //     alert('Failed to store remarks. Please try again later.');
-  //   }
-  // };
-  
   const storeRemarks = async () => {
-    let data; // Define the data variable
     try {
       const response = await axiosInstance.post(`/project/${projectId}/remarks`, { remarks });
-      data = response.data; // Assign a value to the data variable if needed
-      console.log("Remarks stored successfully");
-      console.log('Data:', remarks);
-      // Add any additional logic here
+      console.log("Remarks stored successfully:", response.data);
+      alert("Remarks have been submitted");
     } catch (error) {
       console.error('Error storing remarks:', error);
       alert('Failed to store remarks. Please try again later.');
     }
   };
-  
 
   const sendEmailWithLink = async (link) => {
     try {
@@ -133,6 +135,7 @@ const ProjectDetailsPage = () => {
         subject: 'Access Link for Project Details (Read-Only)',
         text: `Dear Team Member,\n\nYou have been assigned to review the project '${partproject.name}'.\n\nPlease find the read-only access link for the project details below:\n\n${link}\n\nThank you.`
       });
+      console.log('Email sent with link:', link);
       navigate('/assign-ticket');
     } catch (error) {
       console.error('Error sending email:', error);
@@ -141,19 +144,24 @@ const ProjectDetailsPage = () => {
   };
 
   const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
+    const selectedDateValue = e.target.value;
+    setSelectedDate(selectedDateValue);
+    console.log('Selected Date Changed:', selectedDateValue);
   };
 
   const handleRemarkChange = (memberId, index, value) => {
-    setRemarks({
+    const updatedRemarks = {
       ...remarks,
       [`${memberId}_${index}`]: value
-    });
+    };
+    setRemarks(updatedRemarks);
+    console.log('Remarks Updated:', updatedRemarks);
   };
 
   return (
     <div>
-      <Navbar />
+      <Navbar showHomeButton={!readOnlyMode} />
+
       <div>
         <label className='member'>Select Date:</label>
         {readOnlyMode ? (
@@ -230,7 +238,11 @@ const ProjectDetailsPage = () => {
             {selectedTl && (
               <div>
                 <label className='tl'>Select Team Member:</label>
-                <select className='tl-member-dropdown' value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)} required>
+                <select className='tl-member-dropdown' value={selectedMember} onChange={(e) => {
+                  const selectedMemberValue = e.target.value;
+                  setSelectedMember(selectedMemberValue);
+                  console.log('Selected Team Member:', selectedMemberValue);
+                }} required>
                   <option value="">Select Member</option>
                   {tlMembers.map(member => (
                     <option key={member.user_id} value={member.login}>{member.firstname} {member.lastname}</option>

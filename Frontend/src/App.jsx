@@ -5,13 +5,13 @@ import ProjectDetailsPage from './components/ProjectDetailsPage';
 import AssignTicketPage from './components/AssignTicketPage';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import TLpage from "./components/TLpage";
+// import TLpage from "./components/TLpage";
 
 
 
 export const keycloak = new Keycloak({
     realm: 'performance',
-    url: 'http://localhost:8080',
+    url: 'http://rahul-ahlawat.io:8080',
     clientId: 'performclient'
 });
 
@@ -33,7 +33,7 @@ const App = () => {
                     <Route path="/project/:projectId" element={<ProjectDetailsPage isTLView={false} />} />
                     <Route path="/tl/:projectId" element={<ProjectDetailsPage isTLView={true} />} />
                     <Route path="/assign-ticket" element={<AssignTicketPage />} />
-                    <Route path="/tl" element={<TLpage />} />
+                    {/* <Route path="/tl" element={<TLpage />} /> */}
                     <Route path="/public" element={<Protected />} />
                 </Routes>
             </BrowserRouter>
