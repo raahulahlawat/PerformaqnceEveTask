@@ -5,6 +5,7 @@ import './css/project.css';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+
 const ProjectDetailsPage = () => {
   const url = new URL(window.location.href);
   const projectId = url.pathname.split('/')[2];
@@ -119,7 +120,10 @@ const ProjectDetailsPage = () => {
 
   const storeRemarks = async () => {
     try {
-      const response = await axiosInstance.post(`/project/${projectId}/remarks`, { remarks });
+      const response = await axiosInstance.post(`/project/${projectId}/remarks`, {
+        remarks,
+        selectedMember
+      });
       console.log("Remarks stored successfully:", response.data);
       alert("Remarks have been submitted");
     } catch (error) {
@@ -127,13 +131,21 @@ const ProjectDetailsPage = () => {
       alert('Failed to store remarks. Please try again later.');
     }
   };
+  
 
   const sendEmailWithLink = async (link) => {
     try {
+      // TL member ka email fetch karein
+      const selectedTlMember = tlMembers.find(member => member.login === selectedMember);
+      const selectedTlMemberName = selectedTlMember ? `${selectedTlMember.firstname} ${selectedTlMember.lastname}` : '';
+      
+      // Email mein selected TL member ka naam include karein
+      const emailText = `Dear Team Member,\n\nYou have been assigned to review the project '${partproject.name}' with TL ${selectedTlMemberName}.\n\nPlease find the read-only access link for the project details below:\n\n${link}\n\nThank you.`;
+      
       await axiosInstance.post('/send-email', {
         recipientEmail: selectedMember,
         subject: 'Access Link for Project Details (Read-Only)',
-        text: `Dear Team Member,\n\nYou have been assigned to review the project '${partproject.name}'.\n\nPlease find the read-only access link for the project details below:\n\n${link}\n\nThank you.`
+        text: emailText
       });
       console.log('Email sent with link:', link);
       navigate('/assign-ticket');
@@ -142,6 +154,7 @@ const ProjectDetailsPage = () => {
       alert('Failed to send email. Please try again later.');
     }
   };
+  
 
   const handleDateChange = (e) => {
     const selectedDateValue = e.target.value;

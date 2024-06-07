@@ -333,7 +333,7 @@ app.post('/project/:id/remarks', async (req, res) => {
   try {
     client = await pool.connect();
     const { id: projectId } = req.params;
-    const { remarks } = req.body;
+    const { remarks, selectedMember } = req.body;
 
     console.log('Received remarks:', remarks);
 
@@ -360,24 +360,24 @@ app.post('/project/:id/remarks', async (req, res) => {
 
     console.log('Transformed remarks:', transformedRemarks);
 
-    // Insert each remark into the database
-    const insertQueries = Object.entries(transformedRemarks).map(([memberId, remarks]) => {
+
+    const insertQueries = Object.entries(transformedRemarks).map(([memberId, memberRemarks]) => {
       return pool.query(
-        'INSERT INTO project_remarks (Date, Project_Name, Member_Name, Remark_1, Remark_2, Remark_3, Remark_4, Remark_5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', 
+        'INSERT INTO project_remarks (Date, Project_Name, Member_Name, tl_email, Remark_1, Remark_2, Remark_3, Remark_4, Remark_5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', 
         [
           date,
           projectName,
           memberNames[memberId],
-          remarks[0] || null,
-          remarks[1] || null,
-          remarks[2] || null,
-          remarks[3] || null,
-          remarks[4] || null,
+          selectedMember,
+          memberRemarks[0] || null,
+          memberRemarks[1] || null,
+          memberRemarks[2] || null,
+          memberRemarks[3] || null,
+          memberRemarks[4] || null,
         ]
       );
     });
 
-    // Execute all insert queries
     await Promise.all(insertQueries);
 
     res.status(200).json({ message: 'Remarks stored successfully' });
