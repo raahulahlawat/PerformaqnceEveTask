@@ -335,18 +335,31 @@ app.post('/project/:id/remarks', async (req, res) => {
     const { id: projectId } = req.params;
     const { remarks, selectedMember } = req.body;
 
-    console.log('Received remarks:', remarks);
-
     const date = new Date();
     const projectNameQuery = 'SELECT name FROM projects WHERE id = $1';
     const projectNameResult = await pool.query(projectNameQuery, [projectId]);
     const projectName = projectNameResult.rows[0].name;
 
-    console.log('Project name:', projectName);
-
-    // Fetch member names dynamically
-    const memberNames = await getProjectMembers(projectId);
-    console.log('Member names:', memberNames);
+    // Fetch member names and emails dynamically
+    const memberDetailsQuery = `
+      SELECT 
+        m.id AS member_id, 
+        u.firstname || ' ' || u.lastname AS member_name,
+        u.login AS member_email
+      FROM 
+        members m 
+      INNER JOIN 
+        users u 
+      ON 
+        m.user_id = u.id 
+      WHERE 
+        m.project_id = $1
+    `;
+    const { rows: projectMembers } = await pool.query(memberDetailsQuery, [parseInt(projectId, 10)]);
+    const memberDetails = {};
+    projectMembers.forEach(row => {
+      memberDetails[row.member_id] = { name: row.member_name, email: row.member_email };
+    });
 
     // Transform remarks into the expected format
     const transformedRemarks = {};
@@ -358,16 +371,15 @@ app.post('/project/:id/remarks', async (req, res) => {
       transformedRemarks[memberId][remarkIndex] = value;
     });
 
-    console.log('Transformed remarks:', transformedRemarks);
-
-
     const insertQueries = Object.entries(transformedRemarks).map(([memberId, memberRemarks]) => {
+      const memberDetail = memberDetails[memberId];
       return pool.query(
-        'INSERT INTO project_remarks (Date, Project_Name, Member_Name, tl_email, Remark_1, Remark_2, Remark_3, Remark_4, Remark_5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', 
+        'INSERT INTO project_remarks (date, project_name, member_name, member_email, tl_email, remark_1, remark_2, remark_3, remark_4, remark_5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', 
         [
           date,
           projectName,
-          memberNames[memberId],
+          memberDetail.name,
+          memberDetail.email,
           selectedMember,
           memberRemarks[0] || null,
           memberRemarks[1] || null,
@@ -378,6 +390,7 @@ app.post('/project/:id/remarks', async (req, res) => {
       );
     });
 
+    // Execute all insert queries
     await Promise.all(insertQueries);
 
     res.status(200).json({ message: 'Remarks stored successfully' });
@@ -391,6 +404,7 @@ app.post('/project/:id/remarks', async (req, res) => {
     }
   }
 });
+
 
 
 app.use((err, req, res, next) => {

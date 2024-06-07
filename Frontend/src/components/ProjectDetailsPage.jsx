@@ -95,18 +95,18 @@ const ProjectDetailsPage = () => {
     console.log('Selected Member:', selectedMember);
     console.log('Selected Date:', selectedDate);
     console.log('Selected TL:', selectedTl);
-
+  
     try {
       if (!selectedMember) {
         alert('Please select a team member.');
         return;
       }
-
+  
       const uniqueId = uuidv4();
       const expirationTime = new Date(Date.now() + 30 * 60 * 1000).toISOString();
       const readOnlyLink = `http://rahul-ahlawat.io:5173/project/${projectId}?id=${uniqueId}&expires=${expirationTime}&selectedDate=${selectedDate}&selectedTl=${selectedTl}&selectedMember=${selectedMember}&readOnly=true`;
       console.log('Read-Only Link:', readOnlyLink);
-
+  
       if (readOnlyMode) {
         await storeRemarks();
       } else {
@@ -117,7 +117,7 @@ const ProjectDetailsPage = () => {
       alert('Failed to process. Please try again later.');
     }
   };
-
+  
   const storeRemarks = async () => {
     try {
       const response = await axiosInstance.post(`/project/${projectId}/remarks`, {
@@ -132,14 +132,13 @@ const ProjectDetailsPage = () => {
     }
   };
   
+  
 
   const sendEmailWithLink = async (link) => {
     try {
-      // TL member ka email fetch karein
       const selectedTlMember = tlMembers.find(member => member.login === selectedMember);
       const selectedTlMemberName = selectedTlMember ? `${selectedTlMember.firstname} ${selectedTlMember.lastname}` : '';
       
-      // Email mein selected TL member ka naam include karein
       const emailText = `Dear Team Member,\n\nYou have been assigned to review the project '${partproject.name}' with TL ${selectedTlMemberName}.\n\nPlease find the read-only access link for the project details below:\n\n${link}\n\nThank you.`;
       
       await axiosInstance.post('/send-email', {
