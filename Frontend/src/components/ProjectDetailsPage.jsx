@@ -125,7 +125,8 @@ const ProjectDetailsPage = () => {
         selectedMember
       });
       console.log("Remarks stored successfully:", response.data);
-      alert("Remarks have been submitted");
+      // alert("Remarks have been submitted");
+      navigate('/marks-submitted')
     } catch (error) {
       console.error('Error storing remarks:', error);
       alert('Failed to store remarks. Please try again later.');

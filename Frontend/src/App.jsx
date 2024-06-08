@@ -5,9 +5,7 @@ import ProjectDetailsPage from './components/ProjectDetailsPage';
 import AssignTicketPage from './components/AssignTicketPage';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-// import TLpage from "./components/TLpage";
-
-
+import MarksSubmittedPage from './components/MarksSubmittedPage';
 
 export const keycloak = new Keycloak({
     realm: 'performance',
@@ -33,7 +31,7 @@ const App = () => {
                     <Route path="/project/:projectId" element={<ProjectDetailsPage isTLView={false} />} />
                     <Route path="/tl/:projectId" element={<ProjectDetailsPage isTLView={true} />} />
                     <Route path="/assign-ticket" element={<AssignTicketPage />} />
-                    {/* <Route path="/tl" element={<TLpage />} /> */}
+                    <Route path="/marks-submitted" element={<MarksSubmittedPage/>} />
                     <Route path="/public" element={<Protected />} />
                 </Routes>
             </BrowserRouter>
