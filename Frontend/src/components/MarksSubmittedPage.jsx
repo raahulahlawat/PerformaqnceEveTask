@@ -11,7 +11,7 @@ import {
 const MarksSubmittedPage = ({ readOnlyMode }) => {
   return (
     <div>
-      <Navbar showHomeButton={!readOnlyMode} /> {/* Pass true to show the home button if not in read-only mode */}
+      <Navbar showHomeButton={!readOnlyMode} />
       <div className='assigned'>
         <Alert
           status='success'

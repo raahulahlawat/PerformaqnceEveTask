@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './css/home.css';
 import {
-  Button, ButtonGroup, Menu,
+  Button, Menu,
   MenuButton,
   MenuList,
   MenuItem
@@ -38,7 +38,7 @@ const Home = () => {
               <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
                 Projects
               </MenuButton>
-              <MenuList style={{ maxHeight: '600px', overflowY: 'auto' }}>
+              <MenuList style={{ maxHeight: '500px', overflowY: 'auto' }}>
                 {projects.map(project => (
                   <MenuItem key={project.id}>
                     <Button onClick={() => projectdetail(project.id)}>{project.name}</Button>
