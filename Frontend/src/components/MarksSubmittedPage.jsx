@@ -1,18 +1,15 @@
 import React from 'react';
-import Navbar from './Navbar';
-import './css/assign.css';
-import {
-    Alert,
-    AlertIcon,
-    AlertTitle,
-    AlertDescription,
-} from '@chakra-ui/react';
+import { Alert, AlertIcon, AlertTitle, AlertDescription, Button } from '@chakra-ui/react';
+import { keycloak } from '../App';
+import './css/remarks.css';
 
-const MarksSubmittedPage = ({ readOnlyMode }) => {
+const MarksSubmittedPage = () => {
+  const handleLogout = () => {
+    keycloak.logout();
+  };
+
   return (
-    <div>
-      <Navbar showHomeButton={!readOnlyMode} />
-      <div className='assigned'>
+    <div className='assigned'>
         <Alert
           status='success'
           variant='subtle'
@@ -24,14 +21,16 @@ const MarksSubmittedPage = ({ readOnlyMode }) => {
         >
           <AlertIcon boxSize='40px' mr={0} />
           <AlertTitle mt={4} mb={1} fontSize='lg'>
-          Marks Submitted
+            Marks Submitted
           </AlertTitle>
           <AlertDescription maxWidth='sm'>
-          Your remarks have been successfully submitted.
+            Your remarks have been successfully submitted.
+            <Button className='logout' onClick={handleLogout}>Logout</Button>
           </AlertDescription>
         </Alert>
       </div>
-    </div>
+      
+
   );
 };
 

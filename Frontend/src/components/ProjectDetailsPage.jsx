@@ -98,16 +98,38 @@ const ProjectDetailsPage = () => {
 
   const storeRemarks = async () => {
     try {
-      await axiosInstance.post(`/project/${projectId}/remarks`, {
+      const response = await axiosInstance.post(`/project/${projectId}/remarks`, {
         remarks,
         selectedMember
       });
-      navigate('/marks-submitted');
+  
+      if (response.status === 200) {
+        // Remarks stored successfully
+        navigate('/marks-submitted');
+      } else {
+        // Check if the error message indicates existing remarks
+        if (response.data.message === 'Remarks for this project by this TL already exist for this month') {
+          // Alert the user that remarks have already been submitted
+          alert('Remarks have been submitted already');
+        } else {
+          // Handle other errors
+          console.error('Error storing remarks:', response.data.message);
+          // Display a generic error message to the user
+          alert('Failed to store remarks. Please try again later.');
+        }
+      }
     } catch (error) {
       console.error('Error storing remarks:', error);
-      alert('Failed to store remarks. Please try again later.');
+      if (error.response && error.response.status === 400) {
+        // Display an alert for the specific 400 error response
+        alert('Remarks for this project by this TL already exist for this month.');
+      } else {
+        // Display a generic error message to the user for other errors
+        alert('Failed to store remarks. Please try again later.');
+      }
     }
   };
+  
 
   const sendEmailWithLink = async (link) => {
     try {
