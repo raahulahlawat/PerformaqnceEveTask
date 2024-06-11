@@ -102,7 +102,7 @@ const ProjectDetailsPage = () => {
         remarks,
         selectedMember
       });
-  
+
       if (response.status === 200) {
         // Remarks stored successfully
         navigate('/marks-submitted');
@@ -129,14 +129,14 @@ const ProjectDetailsPage = () => {
       }
     }
   };
-  
+
 
   const sendEmailWithLink = async (link) => {
     try {
       const selectedTlMember = tlMembers.find(member => member.login === selectedMember);
       const selectedTlMemberName = selectedTlMember ? `${selectedTlMember.firstname} ${selectedTlMember.lastname}` : '';
 
-      const emailText = `Dear Team Member,\n\nYou have been assigned to review the project '${partproject.name}' with TL ${selectedTlMemberName}.\n\nPlease find the read-only access link for the project details below:\n\n${link}\n\nThank you.`;
+      const emailText = `Dear ${selectedTlMemberName},\n\nYou have been assigned to review the project '${partproject.name}'.\n\nPlease find the read-only access link for the project details below:\n\n${link}\n\nThank you.`;
 
       await axiosInstance.post('/send-email', {
         recipientEmail: selectedMember,
@@ -190,9 +190,9 @@ const ProjectDetailsPage = () => {
               <thead>
                 <tr>
                   <th className='number-column'>#</th>
-                  <th>Member Name</th>
+                  <th className="member-name">Member Name</th>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <th key={i}>Remarks {i + 1}</th>
+                    <th key={i} className="remarks-header">Remarks {i + 1}</th>
                   ))}
                 </tr>
               </thead>

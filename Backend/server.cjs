@@ -19,7 +19,7 @@ app.use(cors({
 
 const pool = new Pool({
   user: 'postgres',
-  host: '172.23.0.4',
+  host: '172.23.0.2',
   database: 'redmine',
   password: 'password',
   port: 5432,
@@ -318,8 +318,6 @@ const getProjectMembers = async (projectId) => {
   return memberNames;
 };
 
-
-
 app.post('/project/:id/remarks', async (req, res) => {
   let client;
   try {
@@ -335,7 +333,6 @@ app.post('/project/:id/remarks', async (req, res) => {
       throw new Error('Project not found');
     }
 
-    // Fetch member names and emails dynamically
     const memberDetailsQuery = `
       SELECT 
         m.id AS member_id, 
@@ -369,17 +366,18 @@ app.post('/project/:id/remarks', async (req, res) => {
     
     const monthName = new Intl.DateTimeFormat('en', { month: 'long' }).format(date);
     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const year = date.getFullYear(); // Get the current year
 
-    // Check if a remark already exists for this project and TL in the current month
+    // Check if a remark already exists for this project and TL in the current month and year
     const existingRemarkQuery = `
       SELECT * FROM project_remarks 
-      WHERE project_name = $1 AND tl_email = $2 AND date >= $3
+      WHERE project_name = $1 AND tl_email = $2 AND month = $3 AND year = $4
     `;
-    const existingRemarksResult = await pool.query(existingRemarkQuery, [projectName, selectedMember, firstDayOfMonth]);
+    const existingRemarksResult = await pool.query(existingRemarkQuery, [projectName, selectedMember, monthName, year]);
 
     if (existingRemarksResult.rows.length > 0) {
       console.log('Existing remarks found:', existingRemarksResult.rows);
-      return res.status(400).json({ message: 'Remarks for this project by this TL already exist for this month' });
+      return res.status(400).json({ message: 'Remarks for this project by this TL already exist for this month and year' });
     }
 
     const insertQueries = Object.entries(transformedRemarks).map(([memberId, memberRemarks]) => {
@@ -388,10 +386,11 @@ app.post('/project/:id/remarks', async (req, res) => {
         throw new Error(`Member details not found for member ID ${memberId}`);
       }
       return pool.query(
-        'INSERT INTO project_remarks (date, project_name, member_name, member_email, tl_email, remark_1, remark_2, remark_3, remark_4, remark_5, month) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', 
+        'INSERT INTO project_remarks (date, project_name, project_id, member_name, member_email, tl_email, remark_1, remark_2, remark_3, remark_4, remark_5, month, year) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)', 
         [
           date,
           projectName,
+          projectId,
           memberDetail.name,
           memberDetail.email,
           selectedMember,
@@ -400,9 +399,11 @@ app.post('/project/:id/remarks', async (req, res) => {
           memberRemarks[2] || null,
           memberRemarks[3] || null,
           memberRemarks[4] || null,
-          monthName
+          monthName,
+          year
         ]
       );
+      
     });
 
     await Promise.all(insertQueries);
@@ -419,6 +420,27 @@ app.post('/project/:id/remarks', async (req, res) => {
     }
   }
 });
+
+
+
+app.delete('/api/projects/:id/remarks', async (req, res) => {
+  const { id } = req.params;
+  const { month, year } = req.query;
+
+  try {
+    const remarksExist = await pool.query('SELECT * FROM project_remarks WHERE project_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3', [id, month, year]);
+    if (remarksExist.rows.length === 0) {
+      return res.status(404).json({ message: 'No remarks found for the selected month and year.' });
+    }
+    await pool.query('DELETE FROM project_remarks WHERE project_id = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3', [id, month, year]);
+    res.status(200).json({ message: 'Remarks deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting remarks:', error);
+    res.status(500).json({ message: 'Failed to delete remarks' });
+  }
+});
+
+
 
 
 app.use((err, req, res, next) => {

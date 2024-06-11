@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation hook
 import {
   Box,
   Flex,
@@ -21,11 +21,27 @@ import './css/nav.css';
 
 export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode();
+  const location = useLocation(); // Use useLocation hook to access location object
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    if (keycloak.authenticated) {
+      const userProfile = keycloak.tokenParsed?.name || 'User';
+      setUserName(userProfile);
+    }
+  }, [keycloak.authenticated]);
 
   const isReadOnly = () => {
     const params = new URLSearchParams(location.search);
     return params.get('readOnly') === 'true';
   };
+
+  const getUserNameFromLink = () => {
+    const params = new URLSearchParams(location.search);
+    const selectedMember = params.get('selectedMember') || '';
+    return selectedMember.split('@')[0]; // Get the part before '@'
+  };
+
 
   return (
     <>
@@ -61,8 +77,9 @@ export default function Nav() {
                   </Center>
                   <br />
                   <Center>
-                    <p>Admin</p>
+                    <p>{isReadOnly() ? getUserNameFromLink() : userName}</p>
                   </Center>
+
                   <br />
                   <MenuDivider />
                   {!isReadOnly() && (

@@ -7,3 +7,28 @@
     font-size: 25px;
     font-weight: bolder;
 }
+
+.project-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Adjust space between elements */
+  }
+  
+  .project-item > button + button {
+    margin-left: 50px;
+  }
+  
+  .delete-button {
+    background-color: red; /* Optional: to visually differentiate the delete button */
+    color: white;
+  }
+  
+  .custom-date-picker {
+    width: 150px;
+    font-weight: bold;
+    font-size: 1em;
+    margin-left: 2px;
+
+  }
+  
+  
