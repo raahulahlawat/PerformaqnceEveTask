@@ -19,7 +19,7 @@ const ProjectDetailsPage = () => {
   const [tlMembers, setTlMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const [currentMonth, setCurrentMonth] = useState('');
+  const [, setCurrentMonth] = useState('');
   const [remarks, setRemarks] = useState({});
   const navigate = useNavigate();
 

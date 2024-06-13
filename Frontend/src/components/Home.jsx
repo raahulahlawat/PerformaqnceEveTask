@@ -19,7 +19,7 @@ import { keycloak } from '../App'; // Import keycloak instance
 
 const Home = () => {
   const navigate = useNavigate();
-  const [isLoading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [projectIdToDelete, setProjectIdToDelete] = useState(null);
@@ -44,9 +44,6 @@ const Home = () => {
       try {
         const month = selectedMonth.getMonth() + 1;
         const year = selectedMonth.getFullYear();
-        const response = await axios.delete(`http://rahul-ahlawat.io:3001/api/projects/${projectIdToDelete}/remarks`, {
-          params: { month, year }
-        });
         alert('Remarks deleted successfully.');
         window.location.reload(); // Refresh the page
       } catch (error) {

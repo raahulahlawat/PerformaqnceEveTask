@@ -7,7 +7,6 @@ const Keycloak = require('keycloak-connect');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
@@ -35,6 +34,7 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: 5432,
 });
+
 
 // Set up session store
 const memoryStore = new session.MemoryStore();
@@ -307,27 +307,6 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
   }
 });
 
-const getProjectMembers = async (projectId) => {
-  const membersQuery = `
-    SELECT 
-      m.id AS member_id, 
-      u.firstname || ' ' || u.lastname AS member_name
-    FROM 
-      members m 
-    INNER JOIN 
-      users u 
-    ON 
-      m.user_id = u.id 
-    WHERE 
-      m.project_id = $1
-  `;
-  const { rows: projectMembers } = await pool.query(membersQuery, [parseInt(projectId, 10)]);
-  const memberNames = {};
-  projectMembers.forEach(row => {
-    memberNames[row.member_id] = row.member_name;
-  });
-  return memberNames;
-};
 
 app.post('/project/:id/remarks', async (req, res) => {
   let client;
@@ -376,7 +355,6 @@ app.post('/project/:id/remarks', async (req, res) => {
 
     
     const monthName = new Intl.DateTimeFormat('en', { month: 'long' }).format(date);
-    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
     const year = date.getFullYear(); // Get the current year
 
     // Check if a remark already exists for this project and TL in the current month and year
@@ -451,7 +429,7 @@ app.delete('/api/projects/:id/remarks', async (req, res) => {
   }
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
