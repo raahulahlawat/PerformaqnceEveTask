@@ -6,29 +6,40 @@ const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const helmet = require('helmet');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.',
+});
 
+app.use('/api/', apiLimiter);
+app.use(helmet());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'http://rahul-ahlawat.io:5173',
+  origin: process.env.CORS_ORIGIN,
   credentials: true
 }));
 
 const pool = new Pool({
-  user: 'postgres',
-  host: '172.23.0.2',
-  database: 'redmine',
-  password: 'password',
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
   port: 5432,
 });
 
 // Set up session store
 const memoryStore = new session.MemoryStore();
 app.use(session({
-  secret: 'vvvJdhrIUQgP19qALcc0hzQUcZZIJhNH',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   store: memoryStore
@@ -46,8 +57,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: "raahuulchaudhary@gmail.com",
-    pass: "falvizqrydjjhyix",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -55,7 +66,7 @@ const emailLinks = {};
 
 async function sendEmail(recipientEmail, subject, text) {
   let mailOptions = {
-    from: 'raahuulchaudhary@gmail.com',
+    from: process.env.EMAIL_FROM,
     to: recipientEmail,
     subject: subject,
     text: text
@@ -439,9 +450,6 @@ app.delete('/api/projects/:id/remarks', async (req, res) => {
     res.status(500).json({ message: 'Failed to delete remarks' });
   }
 });
-
-
-
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

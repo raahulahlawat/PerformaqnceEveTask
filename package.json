@@ -11,8 +11,28 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "react-datepicker": "^6.9.0"
+    "keycloak-admin": "^1.14.22",
+    "keycloak-connect": "^25.0.0",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.13",
+    "pg": "^8.12.0",
+    "react-datepicker": "^6.9.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.7",
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-react": "^7.24.7",
+    "babel-loader": "^9.1.3",
+    "webpack": "^5.92.0",
+    "webpack-cli": "^5.1.4"
   }
 }

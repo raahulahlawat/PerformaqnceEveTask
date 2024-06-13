@@ -8,12 +8,14 @@ import {
   MenuList,
   MenuItem,
   Flex,
-  Box
+  IconButton,
+  Tooltip // Import Tooltip from Chakra UI
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons'; // Import the DeleteIcon
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { keycloak } from '../App'; // Import keycloak instance
 
 const Home = () => {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ const Home = () => {
   const [projects, setProjects] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [projectIdToDelete, setProjectIdToDelete] = useState(null);
+  const [userInfo, setUserInfo] = useState(null); // State to hold user info
 
   const projectDetail = (id) => {
     navigate(`projects/${id}`);
@@ -55,9 +58,21 @@ const Home = () => {
         }
       }
     }
-  };  
+  };
 
+  // Fetch user info and log it
   useEffect(() => {
+    if (keycloak.authenticated) {
+      keycloak.loadUserInfo()
+      .then(userInfo => {
+        console.log("User Info:", userInfo);
+        setUserInfo(userInfo);
+      })
+      .catch(error => {
+        console.error("Error fetching user info:", error);
+      });
+    
+    }
     axios.get('http://rahul-ahlawat.io:3001/api/data')
       .then((res) => {
         setProjects(res.data);
@@ -69,9 +84,10 @@ const Home = () => {
     <div>
       <Navbar />
       <div>
+        <br />
         <div className='project-drop'>
           <h1 className='welcome'>Welcome to the Performance Evaluation Tracker Website</h1>
-          <br />
+          <br /> <br />
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
               Projects
@@ -80,8 +96,18 @@ const Home = () => {
               {projects.map(project => (
                 <MenuItem key={project.id}>
                   <Flex justifyContent="space-between" width="100%">
-                    <Button onClick={() => projectDetail(project.id)}>{project.name}</Button>
-                    <Button colorScheme="red" onClick={() => setProjectIdToDelete(project.id)}>Delete Remarks</Button>
+                    <Tooltip label="Click to Assign Review form to TL" aria-label="Assign Review Tooltip">
+                      <Button onClick={() => projectDetail(project.id)}>{project.name}</Button>
+                    </Tooltip>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <Tooltip label="Click to Delete existing remarks" aria-label="Delete Remarks Tooltip">
+                      <IconButton 
+                        colorScheme="red" 
+                        icon={<DeleteIcon />} 
+                        onClick={() => setProjectIdToDelete(project.id)}
+                        aria-label="Delete Remarks"
+                      />
+                    </Tooltip>
                   </Flex>
                 </MenuItem>
               ))}
@@ -89,9 +115,12 @@ const Home = () => {
           </Menu>
           {projectIdToDelete && (
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
+              <br />
               <h2 style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '1.2em' }}>Select Month and Year to Delete Remarks</h2>
-              <h2 style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '1em' }}>{projects.find(project => project.id === projectIdToDelete)?.name}</h2>
+              <br />
+              <h2 style={{ color:"Blue", marginBottom: '10px', fontWeight: 'bold', fontSize: '1.2em' }}>{projects.find(project => project.id === projectIdToDelete)?.name}</h2>
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '10px' }}>
+                <br /> <br /><br /> <br />
                 <DatePicker
                   selected={selectedMonth}
                   onChange={date => setSelectedMonth(date)}
@@ -99,13 +128,21 @@ const Home = () => {
                   showMonthYearPicker
                   className="custom-date-picker"
                 />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <Button colorScheme="red" onClick={deleteProjectRemarks}>Confirm Delete</Button>
               </div>
             </div>
           )}
-
         </div>
       </div>
+      
+      {userInfo && (
+        <div>
+          <h2>User Information:</h2>
+          <p>Name: {userInfo.name}</p>
+          <p>Email: {userInfo.email}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,32 +5,34 @@ import './css/remarks.css';
 
 const MarksSubmittedPage = () => {
   const handleLogout = () => {
-    keycloak.logout();
+    keycloak.logout({
+      redirectUri: 'http://rahul-ahlawat.io:5173' // Change this to your desired post-logout redirect URI
+    });
   };
 
   return (
     <div className='assigned'>
-        <Alert
-          status='success'
-          variant='subtle'
-          flexDirection='column'
-          alignItems='center'
-          justifyContent='center'
-          textAlign='center'
-          height='200px'
-        >
-          <AlertIcon boxSize='40px' mr={0} />
-          <AlertTitle mt={4} mb={1} fontSize='lg'>
-            Marks Submitted
-          </AlertTitle>
-          <AlertDescription maxWidth='sm'>
-            Your remarks have been successfully submitted.
-            <Button className='logout' onClick={handleLogout}>Logout</Button>
-          </AlertDescription>
-        </Alert>
-      </div>
-      
-
+      <Alert
+        status='success'
+        variant='subtle'
+        flexDirection='column'
+        alignItems='center'
+        justifyContent='center'
+        textAlign='center'
+        height='200px'
+      >
+        <AlertIcon boxSize='40px' mr={0} />
+        <AlertTitle mt={4} mb={1} fontSize='lg'>
+          Marks Submitted
+        </AlertTitle>
+        <AlertDescription maxWidth='sm'>
+          Your remarks have been successfully submitted.
+          <Button className='logout' onClick={handleLogout} mt={4}>
+            Logout
+          </Button>
+        </AlertDescription>
+      </Alert>
+    </div>
   );
 };
 
