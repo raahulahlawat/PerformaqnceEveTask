@@ -45,9 +45,18 @@ app.use(session({
   store: memoryStore
 }));
 
+const keycloakConfig = {
+  clientId: 'performclient',
+  bearerOnly: true,
+  serverUrl: 'http://rahul-ahlawat.io:8080',
+  realm: 'performance',
+  realmPublicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsvaU3ellnpq64DbyuV+iu15oy29DkgWmuCaea2Oy0o7pYk/7lswjHoNcMajzAYHkUY0F34kzohWa9aj6Iso5JhZlztOybFuPl367Nd9ZxiBgabij/w7nI/jXCQzcWfzE0zI0j2Y2BIos7XNrhGE5KXjETXd5DyoBx3nh808d5RNiyq92Tg2Y4cMobOFiE1rRip68sukRPObIYGq3NfPNVLOrEaFVIC10KC6VS+EpkP/Mm0UngPgNdcdJtVfXi2wt7+orFNZapa8CXGfQfIaw2CTmCptPVmywotcRUN2wcrffWjuLeDeNEFQ3eBZno867YVSPAocnNPuU1Zn0Vst0BQIDAQAB'
+};
+
 // Initialize Keycloak
-const keycloakConfig = require('./keycloak.json');
+// const keycloakConfig = require('./keycloak.json');
 const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
+app.set( 'trust proxy', true );
 app.use(keycloak.middleware());
 
 app.use(express.json());
@@ -110,6 +119,32 @@ app.get('/api/data', async (req, res) => {
     }
   }
 });
+
+// app.get('/api/data', keycloak.protect(), async (req, res) => {
+//   try {
+//     // Access Keycloak token information
+//     const { email, given_name, roles } = req.kauth.grant.access_token.content;
+
+//     // Fetch data securely from database or other services
+//     let client;
+//     try {
+//       client = await pool.connect();
+//       const result = await client.query('SELECT * FROM projects');
+//       const data = result.rows;
+//       res.json(data);
+//     } catch (err) {
+//       console.error('Error fetching data', err);
+//       res.status(500).json({ message: 'Internal server error' });
+//     } finally {
+//       if (client) {
+//         client.release();
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Error accessing protected endpoint:', error);
+//     res.status(500).json({ message: 'Failed to retrieve data' });
+//   }
+// });
 
 app.get('/project/:id', async (req, res) => {
   let client;
@@ -353,7 +388,7 @@ app.post('/project/:id/remarks', async (req, res) => {
       transformedRemarks[memberId][remarkIndex] = value;
     });
 
-    
+
     const monthName = new Intl.DateTimeFormat('en', { month: 'long' }).format(date);
     const year = date.getFullYear(); // Get the current year
 
@@ -375,7 +410,7 @@ app.post('/project/:id/remarks', async (req, res) => {
         throw new Error(`Member details not found for member ID ${memberId}`);
       }
       return pool.query(
-        'INSERT INTO project_remarks (date, project_name, project_id, member_name, member_email, tl_email, remark_1, remark_2, remark_3, remark_4, remark_5, month, year) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)', 
+        'INSERT INTO project_remarks (date, project_name, project_id, member_name, member_email, tl_email, remark_1, remark_2, remark_3, remark_4, remark_5, month, year) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
         [
           date,
           projectName,
@@ -392,7 +427,7 @@ app.post('/project/:id/remarks', async (req, res) => {
           year
         ]
       );
-      
+
     });
 
     await Promise.all(insertQueries);

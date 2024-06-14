@@ -9,7 +9,7 @@ import {
   MenuItem,
   Flex,
   IconButton,
-  Tooltip // Import Tooltip from Chakra UI
+  Tooltip
 } from '@chakra-ui/react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons'; // Import the DeleteIcon
 import axios from 'axios';
@@ -44,6 +44,7 @@ const Home = () => {
       try {
         const month = selectedMonth.getMonth() + 1;
         const year = selectedMonth.getFullYear();
+        await axios.delete(`http://rahul-ahlawat.io:3001/api/projects/${projectIdToDelete}/remarks?month=${month}&year=${year}`);
         alert('Remarks deleted successfully.');
         window.location.reload(); // Refresh the page
       } catch (error) {
@@ -56,7 +57,7 @@ const Home = () => {
       }
     }
   };
-
+  
   // Fetch user info and log it
   useEffect(() => {
     if (keycloak.authenticated) {
