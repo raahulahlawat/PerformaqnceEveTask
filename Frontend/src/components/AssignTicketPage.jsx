@@ -26,10 +26,10 @@ const AssignTicketPage = () => {
         >
           <AlertIcon boxSize='40px' mr={0} />
           <AlertTitle mt={4} mb={1} fontSize='lg'>
-            Ticket Assigned!
+            Review Form Sent!
           </AlertTitle>
           <AlertDescription maxWidth='sm'>
-            Ticket has been assigned to the TL of {projectName} project.
+            Review Form Link has been successfully sent to the Team Lead of the {projectName} project.
           </AlertDescription>
         </Alert>
       </div>

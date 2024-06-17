@@ -8,13 +8,83 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const axios = require('axios');
+
+const tokenRequest = {
+  method: 'post',
+  url: 'http://rahul-ahlawat.io:8080/realms/performance/protocol/openid-connect/token',
+  data: {
+    grant_type: 'client_credentials',
+    client_id: 'performclient',
+    client_secret: 'amGLImkM6wpVm5XyY1qxrxxdquuo8oX2',
+  },
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+};
+
+let authToken = null;
+let tokenExpiration = null;
+
+const api = axios.create({
+  baseURL: 'http://rahul-ahlawat.io:3001',
+});
+
+api.get('/api/data')
+  .then(response => {
+    // console.log('Data:', response.data);
+  })
+  .catch(error => {
+    console.error('API Request Error:', error.message);
+  });
+
+api.interceptors.request.use(async (config) => {
+  // Check if token is expired or about to expire (say 10 seconds before expiry)
+  if (!authToken || !tokenExpiration || tokenExpiration < Date.now() + 10000) {
+    try {
+      const response = await axios(tokenRequest);
+      authToken = response.data.access_token;
+      tokenExpiration = Date.now() + (response.data.expires_in * 1000); // Convert to milliseconds
+    } catch (error) {
+      console.error('Error refreshing token:', error.message);
+      throw error;
+    }
+  }
+  // Set Authorization header with the fresh token
+  config.headers.Authorization = `Bearer ${authToken}`;
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+axios(tokenRequest)
+  .then(response => {
+    console.log('Token response:', response.data);
+    // Handle successful token retrieval
+  })
+  .catch(error => {
+    console.error('Token request error:', error);
+    // Handle error
+  });
+
+
+axios(tokenRequest)
+  .then(response => {
+    console.log('Token response:', response.data);
+    // Handle successful token retrieval
+  })
+  .catch(error => {
+    console.error('Token request error:', error);
+    // Handle error
+  });
+
+
 
 const app = express();
 const port = process.env.PORT || 3001;
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 100,
   message: 'Too many requests, please try again later.',
 });
 
@@ -23,23 +93,24 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: "http://rahul-ahlawat.io:5173",
   credentials: true
 }));
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
+  user: "postgres",
+  host: "172.19.0.2",
+  database: "redmine",
+  password: "password",
   port: 5432,
+  connectionTimeoutMillis: 5000,
 });
 
 
 // Set up session store
 const memoryStore = new session.MemoryStore();
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: "amGLImkM6wpVm5XyY1qxrxxdquuo8oX2",
   resave: false,
   saveUninitialized: true,
   store: memoryStore
@@ -53,21 +124,25 @@ const keycloakConfig = {
   realmPublicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsvaU3ellnpq64DbyuV+iu15oy29DkgWmuCaea2Oy0o7pYk/7lswjHoNcMajzAYHkUY0F34kzohWa9aj6Iso5JhZlztOybFuPl367Nd9ZxiBgabij/w7nI/jXCQzcWfzE0zI0j2Y2BIos7XNrhGE5KXjETXd5DyoBx3nh808d5RNiyq92Tg2Y4cMobOFiE1rRip68sukRPObIYGq3NfPNVLOrEaFVIC10KC6VS+EpkP/Mm0UngPgNdcdJtVfXi2wt7+orFNZapa8CXGfQfIaw2CTmCptPVmywotcRUN2wcrffWjuLeDeNEFQ3eBZno867YVSPAocnNPuU1Zn0Vst0BQIDAQAB'
 };
 
-// Initialize Keycloak
-// const keycloakConfig = require('./keycloak.json');
 const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
-app.set( 'trust proxy', true );
 app.use(keycloak.middleware());
 
-app.use(express.json());
 
+// Initialize Keycloak
+// const keycloakConfig = require('./keycloak.json');
+// const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
+// app.set( 'trust proxy', 1 );
+// app.use(keycloak.middleware());
+
+app.use(express.json());
+app.use(morgan('dev'));
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: "raahuulchaudhary@gmail.com",
+    pass: "falvizqrydjjhyix",
   },
 });
 
@@ -75,7 +150,7 @@ const emailLinks = {};
 
 async function sendEmail(recipientEmail, subject, text) {
   let mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "raahuulchaudhary@gmail.com",
     to: recipientEmail,
     subject: subject,
     text: text
@@ -348,7 +423,12 @@ app.post('/project/:id/remarks', async (req, res) => {
   try {
     client = await pool.connect();
     const { id: projectId } = req.params;
-    const { remarks, selectedMember, uniqueId } = req.body; // Added uniqueId to the request body
+    const { remarks, selectedMember, uniqueId } = req.body; 
+
+    // Check if remarks field is present and not empty
+    if (!remarks || Object.keys(remarks).length === 0) {
+      return res.status(400).json({ message: 'Remarks field is required and cannot be empty' });
+    }
 
     const date = new Date();
     const projectNameQuery = 'SELECT name FROM projects WHERE id = $1';
@@ -410,24 +490,23 @@ app.post('/project/:id/remarks', async (req, res) => {
         throw new Error(`Member details not found for member ID ${memberId}`);
       }
       return pool.query(
-        'INSERT INTO project_remarks (date, project_name, project_id, member_name, member_email, tl_email, remark_1, remark_2, remark_3, remark_4, remark_5, month, year) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
+        'INSERT INTO project_remarks (date, month, year, project_id, project_name, tl_email, member_name, member_email, remark_1, remark_2, remark_3, remark_4, remark_5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
         [
-          date,
-          projectName,
-          projectId,
-          memberDetail.name,
-          memberDetail.email,
-          selectedMember,
-          memberRemarks[0] || null,
-          memberRemarks[1] || null,
-          memberRemarks[2] || null,
-          memberRemarks[3] || null,
-          memberRemarks[4] || null,
-          monthName,
-          year
+          date,               // $1: date
+          monthName,          // $2: month
+          year,               // $3: year
+          projectId,          // $4: project_id
+          projectName,        // $5: project_name
+          selectedMember,            // $6: tl_email
+          memberDetail.name,  // $7: member_name
+          memberDetail.email, // $8: member_email
+          memberRemarks[0] || null, // $9: remark_1
+          memberRemarks[1] || null, // $10: remark_2
+          memberRemarks[2] || null, // $11: remark_3
+          memberRemarks[3] || null, // $12: remark_4
+          memberRemarks[4] || null  // $13: remark_5
         ]
       );
-
     });
 
     await Promise.all(insertQueries);

@@ -1,5 +1,5 @@
 .project-drop {
-    margin-left: 50px;
+    margin-left: 125px;
     margin-top: 10px;
 }
 
@@ -14,9 +14,9 @@
     justify-content: space-between; /* Adjust space between elements */
   }
   
-  .project-item > button + button {
+  /* .project-item > button + button {
     margin-left: 50px;
-  }
+  } */
   
   .delete-button {
     background-color: red; /* Optional: to visually differentiate the delete button */
@@ -24,12 +24,16 @@
   }
   
   .custom-date-picker {
-    width: 150px;
+    width: 78px;
     font-weight: bold;
     font-size: 1em;
-    margin-left: 2px;
-    border-radius: 2px solid black;
-
+    border: 2px solid #3a4857;
+    border-radius: 4px;
+    padding: 3px; 
+  }
+  .custom-date-picker:hover{
+    cursor: pointer; 
+    /* background-color: #c5c8ca; */
   }
   
   

@@ -75,17 +75,29 @@ const ProjectDetailsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedMember) {
-      alert('Please select a team member.');
+    if (!selectedDate) {
+      alert('Please select a date.');
       return;
     }
-
-    try {
+    if (!selectedMember) {
+      alert('Please select a TL-Group and a team member to send review form link.');
+      return;
+    }
+    if (readOnlyMode) {
+      for (const member of members) {
+        for (let i = 0; i < 5; i++) { // Assuming there are 5 remark fields per member
+          if (!remarks[`${member.id}_${i}`]) {
+            alert(`Please fill remarks for ${member.firstname} ${member.lastname}.`);
+            return;
+          }
+        }
+      }
+    }
+     try {
       const uniqueId = uuidv4();
       const expirationTime = new Date(Date.now() + 30 * 60 * 1000).toISOString();
       const readOnlyLink = `http://rahul-ahlawat.io:5173/project/${projectId}?id=${uniqueId}&expires=${expirationTime}&selectedDate=${selectedDate}&selectedTl=${selectedTl}&selectedMember=${selectedMember}&readOnly=true`;
-
-      if (readOnlyMode) {
+       if (readOnlyMode) {
         await storeRemarks();
       } else {
         await sendEmailWithLink(readOnlyLink);
@@ -95,6 +107,7 @@ const ProjectDetailsPage = () => {
       alert('Failed to process. Please try again later.');
     }
   };
+ 
 
   const storeRemarks = async () => {
     try {
@@ -198,7 +211,7 @@ const ProjectDetailsPage = () => {
               </thead>
               <tbody>
                 {members.map((member, index) => (
-                  <tr key={member.id}>
+                  <tr key={member.id} required>
                     <td>{index + 1}</td>
                     <td>{member.firstname} {member.lastname}</td>
                     {Array.from({ length: 5 }).map((_, i) => (
