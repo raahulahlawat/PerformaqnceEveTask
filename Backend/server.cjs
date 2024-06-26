@@ -8,84 +8,18 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const axios = require('axios');
-
-const tokenRequest = {
-  method: 'post',
-  url: 'http://rahul-ahlawat.io:8080/realms/performance/protocol/openid-connect/token',
-  data: {
-    grant_type: 'client_credentials',
-    client_id: 'performclient',
-    client_secret: 'amGLImkM6wpVm5XyY1qxrxxdquuo8oX2',
-  },
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
-};
-
-let authToken = null;
-let tokenExpiration = null;
-
-const api = axios.create({
-  baseURL: 'http://rahul-ahlawat.io:3001',
-});
-
-api.get('/api/data')
-  .then(response => {
-    // console.log('Data:', response.data);
-  })
-  .catch(error => {
-    console.error('API Request Error:', error.message);
-  });
-
-api.interceptors.request.use(async (config) => {
-  // Check if token is expired or about to expire (say 10 seconds before expiry)
-  if (!authToken || !tokenExpiration || tokenExpiration < Date.now() + 10000) {
-    try {
-      const response = await axios(tokenRequest);
-      authToken = response.data.access_token;
-      tokenExpiration = Date.now() + (response.data.expires_in * 1000); // Convert to milliseconds
-    } catch (error) {
-      console.error('Error refreshing token:', error.message);
-      throw error;
-    }
-  }
-  // Set Authorization header with the fresh token
-  config.headers.Authorization = `Bearer ${authToken}`;
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
-
-axios(tokenRequest)
-  .then(response => {
-    console.log('Token response:', response.data);
-    // Handle successful token retrieval
-  })
-  .catch(error => {
-    console.error('Token request error:', error);
-    // Handle error
-  });
-
-
-axios(tokenRequest)
-  .then(response => {
-    console.log('Token response:', response.data);
-    // Handle successful token retrieval
-  })
-  .catch(error => {
-    console.error('Token request error:', error);
-    // Handle error
-  });
-
-
 
 const app = express();
 const port = process.env.PORT || 3001;
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: 'Too many requests, please try again later.',
+});
+
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ message: 'Internal Server Error' });
 });
 
 app.use('/api/', apiLimiter);
@@ -99,7 +33,7 @@ app.use(cors({
 
 const pool = new Pool({
   user: "postgres",
-  host: "172.19.0.2",
+  host: "172.19.0.3",
   database: "redmine",
   password: "password",
   port: 5432,
@@ -110,7 +44,7 @@ const pool = new Pool({
 // Set up session store
 const memoryStore = new session.MemoryStore();
 app.use(session({
-  secret: "amGLImkM6wpVm5XyY1qxrxxdquuo8oX2",
+  secret: "@@@###1222###@@@",
   resave: false,
   saveUninitialized: true,
   store: memoryStore
@@ -119,20 +53,13 @@ app.use(session({
 const keycloakConfig = {
   clientId: 'performclient',
   bearerOnly: true,
-  serverUrl: 'http://rahul-ahlawat.io:8080',
+  serverUrl: 'http://localhost:8080',
   realm: 'performance',
-  realmPublicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsvaU3ellnpq64DbyuV+iu15oy29DkgWmuCaea2Oy0o7pYk/7lswjHoNcMajzAYHkUY0F34kzohWa9aj6Iso5JhZlztOybFuPl367Nd9ZxiBgabij/w7nI/jXCQzcWfzE0zI0j2Y2BIos7XNrhGE5KXjETXd5DyoBx3nh808d5RNiyq92Tg2Y4cMobOFiE1rRip68sukRPObIYGq3NfPNVLOrEaFVIC10KC6VS+EpkP/Mm0UngPgNdcdJtVfXi2wt7+orFNZapa8CXGfQfIaw2CTmCptPVmywotcRUN2wcrffWjuLeDeNEFQ3eBZno867YVSPAocnNPuU1Zn0Vst0BQIDAQAB'
+  // realmPublicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsvaU3ellnpq64DbyuV+iu15oy29DkgWmuCaea2Oy0o7pYk/7lswjHoNcMajzAYHkUY0F34kzohWa9aj6Iso5JhZlztOybFuPl367Nd9ZxiBgabij/w7nI/jXCQzcWfzE0zI0j2Y2BIos7XNrhGE5KXjETXd5DyoBx3nh808d5RNiyq92Tg2Y4cMobOFiE1rRip68sukRPObIYGq3NfPNVLOrEaFVIC10KC6VS+EpkP/Mm0UngPgNdcdJtVfXi2wt7+orFNZapa8CXGfQfIaw2CTmCptPVmywotcRUN2wcrffWjuLeDeNEFQ3eBZno867YVSPAocnNPuU1Zn0Vst0BQIDAQAB'
 };
 
 const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
 app.use(keycloak.middleware());
-
-
-// Initialize Keycloak
-// const keycloakConfig = require('./keycloak.json');
-// const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
-// app.set( 'trust proxy', 1 );
-// app.use(keycloak.middleware());
 
 app.use(express.json());
 app.use(morgan('dev'));
@@ -160,6 +87,7 @@ async function sendEmail(recipientEmail, subject, text) {
   console.log('Email sent:', info.response);
 }
 
+
 app.post('/send-email', async (req, res) => {
   try {
     const { recipientEmail, subject, text } = req.body;
@@ -168,7 +96,6 @@ app.post('/send-email', async (req, res) => {
     const uniqueId = urlParams.get('id');
     const expires = urlParams.get('expires');
     emailLinks[uniqueId] = expires;
-
     await sendEmail(recipientEmail, subject, text);
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
@@ -178,7 +105,7 @@ app.post('/send-email', async (req, res) => {
 });
 
 
-app.get('/api/data', async (req, res) => {
+app.get('/api/data',   async (req, res) => {
   let client;
   try {
     client = await pool.connect();
@@ -195,31 +122,29 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
-// app.get('/api/data', keycloak.protect(), async (req, res) => {
-//   try {
-//     // Access Keycloak token information
-//     const { email, given_name, roles } = req.kauth.grant.access_token.content;
+app.get('/api/projects_with_remarks', async (req, res) => {
+  try {
+    // Get current month and year
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index
+    const currentYear = currentDate.getFullYear();
 
-//     // Fetch data securely from database or other services
-//     let client;
-//     try {
-//       client = await pool.connect();
-//       const result = await client.query('SELECT * FROM projects');
-//       const data = result.rows;
-//       res.json(data);
-//     } catch (err) {
-//       console.error('Error fetching data', err);
-//       res.status(500).json({ message: 'Internal server error' });
-//     } finally {
-//       if (client) {
-//         client.release();
-//       }
-//     }
-//   } catch (error) {
-//     console.error('Error accessing protected endpoint:', error);
-//     res.status(500).json({ message: 'Failed to retrieve data' });
-//   }
-// });
+    // Query to fetch remarks for current month and year
+    const query = `
+      SELECT * 
+      FROM project_remarks 
+      WHERE EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2
+    `;
+    const result = await pool.query(query, [currentMonth, currentYear]);
+    const data = result.rows;
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error fetching project remarks:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 app.get('/project/:id', async (req, res) => {
   let client;
@@ -418,6 +343,8 @@ app.get('/project/:id/tls/:tl_id/members', async (req, res) => {
 });
 
 
+
+
 app.post('/project/:id/remarks', async (req, res) => {
   let client;
   try {
@@ -543,10 +470,19 @@ app.delete('/api/projects/:id/remarks', async (req, res) => {
   }
 });
 
-app.use((err, req, res) => {
-  console.error(err.stack);
-  res.status(500).send('Something went wrong!');
+
+
+
+// app.use((err, req, res) => {
+//   console.error(err.stack);
+//   res.status(500).send('Something went wrong!');
+// });
+
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ message: 'Internal Server Error' });
 });
+
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);

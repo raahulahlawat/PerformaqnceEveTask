@@ -1,8 +1,0 @@
-# Ignore development environment variables
-.env.development
-
-# Ignore production environment variables
-.env.production
-
-
-.env

@@ -1,10 +1,10 @@
 {
     "realm": "performance",
-    "auth-server-url": "http://rahul-ahlawat.io:8080/auth",
+    "auth-server-url": "http://localhost:8080/realms/performance/protocol/openid-connect/auth",
     "ssl-required": "none",
     "resource": "performclient",
     "credentials": {
-      "secret": "vvvJdhrIUQgP19qALcc0hzQUcZZIJhNH"
+      "client_secret": "noAIgO3I9X70qdXZ3a6E5xns1QHoglZ6"
     },
     "confidential-port": 0,
     "public-client": true

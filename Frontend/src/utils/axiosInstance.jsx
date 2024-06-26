@@ -4,7 +4,7 @@ import keycloak from './keycloak';
 const axiosInstance = axios.create({
   baseURL: 'http://rahul-ahlawat.io:3001',
   withCredentials: true,
-  timeout: 5000, // Timeout of 5 seconds
+  timeout: 10000, // Timeout of 5 seconds
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,7 +23,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Function to fetch API key from backend
 export const fetchApiKey = async () => {
   try {
     const response = await axiosInstance.get('/api/current-api-key'); // Verify this URL is correct

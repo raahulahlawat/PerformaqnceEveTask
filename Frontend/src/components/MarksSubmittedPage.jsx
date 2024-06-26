@@ -6,7 +6,7 @@ import './css/remarks.css';
 const MarksSubmittedPage = () => {
   const handleLogout = () => {
     keycloak.logout({
-      redirectUri: 'http://rahul-ahlawat.io:5173' // Change this to your desired post-logout redirect URI
+      redirectUri: 'http://rahul-ahlawat.io:5173'
     });
   };
 

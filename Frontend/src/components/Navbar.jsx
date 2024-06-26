@@ -39,7 +39,7 @@ export default function Nav() {
   const getUserNameFromLink = () => {
     const params = new URLSearchParams(location.search);
     const selectedMember = params.get('selectedMember') || '';
-    return selectedMember.split('@')[0]; // Get the part before '@'
+    return selectedMember.split('@')[0];
   };
 
 
