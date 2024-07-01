@@ -6,6 +6,7 @@ import AssignTicketPage from './components/AssignTicketPage';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import MarksSubmittedPage from './components/MarksSubmittedPage';
+import RemarksPage from './components/RemarksPage';
 
 export const keycloak = new Keycloak({
     realm: 'performance',
@@ -59,6 +60,7 @@ const App = () => {
                     <Route path="/assign-ticket" element={<AssignTicketPage />} />
                     <Route path="/marks-submitted" element={<MarksSubmittedPage/>} />
                     <Route path="/public" element={<Protected />} />
+                    <Route path="/remarks/:projectId" element={<RemarksPage/>} />
                 </Routes>
             </BrowserRouter>
         </div>

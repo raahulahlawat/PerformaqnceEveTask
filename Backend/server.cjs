@@ -144,6 +144,72 @@ app.get('/api/projects_with_remarks', async (req, res) => {
   }
 });
 
+// app.get('/project/:id/remarks', async (req, res) => {
+//   const projectId = req.params.id;
+//   const { month, year } = req.query;
+
+//   try {
+//     const client = await pool.connect();
+//     const result = await client.query(
+//       'SELECT * FROM project_remarks WHERE project_id = $1 AND month = $2 AND year = $3',
+//       [projectId, month, year]
+//     );
+//     client.release();
+
+//     console.log('Fetched remarks:', result.rows); // Log fetched remarks
+
+//     res.status(200).json(result.rows);
+//   } catch (err) {
+//     console.error('Error fetching remarks:', err);
+//     res.status(500).send('Error fetching remarks');
+//   }
+// });
+
+
+app.get('/project/:id/remarks', async (req, res) => {
+  const projectId = req.params.id;
+  const { month, year } = req.query;
+
+  try {
+    const client = await pool.connect();
+
+    const remarksQuery = `
+      SELECT 
+        id, 
+        date, 
+        month, 
+        year, 
+        project_id, 
+        project_name, 
+        tl_email, 
+        member_name, 
+        member_email, 
+        remark_1, 
+        remark_2, 
+        remark_3, 
+        remark_4, 
+        remark_5 
+      FROM 
+        project_remarks 
+      WHERE 
+        project_id = $1 
+        AND month = $2 
+        AND year = $3
+    `;
+    const result = await client.query(remarksQuery, [projectId, month, year]);
+    client.release();
+
+    console.log('Fetched remarks:', result.rows); // Log fetched remarks
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Error fetching remarks:', err);
+    res.status(500).send('Error fetching remarks');
+  }
+});
+
+
+
 
 
 app.get('/project/:id', async (req, res) => {

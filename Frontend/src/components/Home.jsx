@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './css/home.css';
 import {
@@ -71,15 +71,19 @@ const Home = () => {
         console.error('Error fetching data:', error);
         setLoading(false);
       });
-    
+
     axios.get('http://rahul-ahlawat.io:3001/api/projects_with_remarks')
       .then((res) => {
         console.log('Projects with remarks data received from server:', res.data);
-        // Remove duplicates based on project name
-        const uniqueProjects = res.data.filter((project, index, self) =>
-          index === self.findIndex((p) => p.project_name === project.project_name)
-        );
-        setProjectsWithRemarks(uniqueProjects);
+        if (res.data && res.data.length > 0) {
+          // Remove duplicates based on project name
+          const uniqueProjects = res.data.filter((project, index, self) =>
+            index === self.findIndex((p) => p.project_name === project.project_name)
+          );
+          setProjectsWithRemarks(uniqueProjects);
+        } else {
+          console.warn('No projects with remarks found.');
+        }
       })
       .catch((error) => {
         console.error('Error fetching projects with remarks data:', error);
@@ -96,6 +100,24 @@ const Home = () => {
         });
     }
   }, []);
+
+  const fetchRemarksForProject = async (projectId) => {
+    try {
+      const currentDate = new Date();
+      const month = currentDate.getMonth() + 1;
+      const year = currentDate.getFullYear();
+      const remarksResponse = await axios.get(`http://localhost:3001/project/${projectId}/remarks?month=${month}&year=${year}`);
+      console.log('Remarks Response:', remarksResponse.data);
+      navigate(`/remarks/${projectId}`, { state: { remarks: remarksResponse.data } });
+    } catch (error) {
+      console.error('Error fetching remarks:', error);
+      if (error.response && error.response.status === 404) {
+        alert("No remarks found for the selected project.");
+      } else {
+        alert('Failed to fetch remarks. Please try again later.');
+      }
+    }
+  };
 
   return (
     <div>
@@ -118,9 +140,9 @@ const Home = () => {
                     </Tooltip>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <Tooltip label="Click to Delete existing remarks of members" aria-label="Delete Remarks Tooltip">
-                      <IconButton 
-                        colorScheme="red" 
-                        icon={<DeleteIcon />} 
+                      <IconButton
+                        colorScheme="red"
+                        icon={<DeleteIcon />}
                         onClick={() => setProjectIdToDelete(project.id)}
                         aria-label="Delete Remarks"
                       />
@@ -130,7 +152,7 @@ const Home = () => {
               ))}
             </MenuList>
           </Menu>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
               Projects with Remarks
@@ -140,7 +162,7 @@ const Home = () => {
                 <MenuItem key={index}>
                   <Flex justifyContent="space-between" width="100%">
                     <Tooltip label="Click to view Project Remarks" aria-label="View Remarks Tooltip">
-                      <Button onClick={() => projectDetail(project.project_id)}>
+                      <Button onClick={() => fetchRemarksForProject(project.project_id)}>
                         {project.project_name}
                       </Button>
                     </Tooltip>
@@ -155,7 +177,7 @@ const Home = () => {
               <br />
               <h2 style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '1.2em' }}>Select Month and Year to Delete Remarks</h2>
               <br />
-              <h2 style={{ color:"Blue", marginBottom: '10px', fontWeight: 'bold', fontSize: '1.2em' }}>{projects.find(project => project.id === projectIdToDelete)?.name}</h2>
+              <h2 style={{ color: "Blue", marginBottom: '10px', fontWeight: 'bold', fontSize: '1.2em' }}>{projects.find(project => project.id === projectIdToDelete)?.name}</h2>
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '10px' }}>
                 <br /> <br /><br /> <br />
                 <DatePicker
@@ -163,10 +185,10 @@ const Home = () => {
                   onChange={date => setSelectedMonth(date)}
                   dateFormat="MM/yyyy"
                   showMonthYearPicker
-                  placeholderText="MM/yyyy" 
+                  placeholderText="MM/yyyy"
                   className="custom-date-picker"
                 />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;
                 <Button colorScheme="red" onClick={deleteProjectRemarks}>Confirm Delete</Button>
               </div>
             </div>

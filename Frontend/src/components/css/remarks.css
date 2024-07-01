@@ -1,3 +1,43 @@
 .logout{
     margin-top: 10px;
 }
+
+/* css/remarks.css */
+.remarks-container {
+    padding: 20px;
+  }
+
+  .p_name{
+    font-size: 25px;
+    font-weight: bold;
+
+  }
+  
+  .remarks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .remarks-table th, .remarks-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .remarks-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+  }
+  
+  .remarks-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .remarks-table tr:hover {
+    background-color: #ddd;
+  }
+  
+  .user-info {
+    margin-top: 20px;
+  }
+  
